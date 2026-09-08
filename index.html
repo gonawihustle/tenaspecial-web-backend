@@ -228,7 +228,6 @@
         <div>
           <label class="block text-slate-400 mb-1">Select / Add Category Folder</label>
           <select id="specCategory" class="w-full p-2 rounded-xl bg-slate-900 border border-slate-800 text-white mb-1.5">
-            <!-- Dynamic categories populated via JS -->
           </select>
           <input type="text" id="newCategoryName" placeholder="Or enter new Category Name (if not in list)" class="w-full p-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs">
         </div>
@@ -295,41 +294,34 @@
   </div>
 
   <script>
-    // State management
     let currentLang = 'EN';
     let targetBot = localStorage.getItem('ts_target_bot') || 'tenaspecial_bot';
     
-    // Allowed Admin IDs
     const allowedAdminIds = ['6379774725', '501384766'];
 
-    // Categories Data
+    // Global site defaults - Editable here to hardcode items for all devices/browsers
     let categories = JSON.parse(localStorage.getItem('ts_categories')) || [
       { id: 'cat_gen', nameEn: 'General Medicine', nameAm: 'ጠቅላላ ህክምና' },
       { id: 'cat_ped', nameEn: 'Pediatrics & Child Health', nameAm: 'የህፃናት ህክምና' },
       { id: 'cat_surg', nameEn: 'General Surgery', nameAm: 'ጠቅላላ ቀዶ ጥገና' }
     ];
 
-    // Specialists Data
     let specialists = JSON.parse(localStorage.getItem('ts_specialists')) || [
       { id: 'sp1', catId: 'cat_gen', nameEn: 'Dr. Selam Hailu', nameAm: 'ዶ/ር ሰላም ሀይሉ', specEn: 'General Practitioner', specAm: 'የጠቅላላ ህክምና ስፔሻሊስት' },
       { id: 'sp2', catId: 'cat_ped', nameEn: 'Dr. Yonas Tadesse', nameAm: 'ዶ/ር ዮናስ ታደሰ', specEn: 'Pediatric Consultant', specAm: 'የህጻናት ህክምና አማካሪ' }
     ];
 
-    // Digital Store Products Data
     let storeProducts = JSON.parse(localStorage.getItem('ts_store')) || [
       { id: 'pr1', nameEn: 'Emergency First Aid Guide', nameAm: 'የመጀመሪያ እርዳታ መመሪያ', descEn: 'Comprehensive emergency home medical manual.', descAm: 'ለቤት ውስጥ ድንገተኛ ህክምና አጠቃላይ መመሪያ።', price: '150 ETB' }
     ];
 
-    // Channels Data
     let channels = JSON.parse(localStorage.getItem('ts_channels')) || [
       { id: 'ch1', nameEn: 'Tenaspecial Free Health Hub', nameAm: 'ጤና ስፔሻል ነፃ የጤና ማዕከል', descEn: 'Free daily health tips and public updates.', descAm: 'ነፃ የየዕለቱ የጤና መረጃዎች እና ምክሮች።', type: 'FREE', link: 'https://t.me/tenaspecial' },
       { id: 'ch2', nameEn: 'VIP Doctor Consultation Group', nameAm: 'የቪአይፒ ዶክተር ማህበር', descEn: 'Exclusive membership group for doctor access.', descAm: 'የቪአይፒ የዶክተር ጥያቄና መልስ አባልነት።', type: 'PAID', link: '' }
     ];
 
-    // Open category tabs tracking
     let openCategories = {};
 
-    // Language Translation Dictionaries
     const i18n = {
       EN: {
         headerSub: "Tenaspecial Digital Hub",
@@ -379,19 +371,13 @@
       }
     };
 
-    function toggleLang() {
-      currentLang = currentLang === 'EN' ? 'AM' : 'EN';
-      renderAll();
-    }
-
+    function toggleLang() { currentLang = currentLang === 'EN' ? 'AM' : 'EN'; renderAll(); }
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
     function openAdminModal() { document.getElementById('adminLoginModal').classList.remove('hidden'); }
 
-    // Superadmin Login
     function verifyAdminLogin() {
       const tgId = document.getElementById('adminTgId').value.trim();
       const pass = document.getElementById('adminPass').value.trim();
-
       if (allowedAdminIds.includes(tgId) && pass === 'tenaspecialadmin') {
         document.getElementById('loginError').classList.add('hidden');
         closeModal('adminLoginModal');
@@ -406,11 +392,7 @@
 
     function saveBotHandle() {
       const b = document.getElementById('adminBotHandle').value.trim().replace('@','');
-      if (b) {
-        targetBot = b;
-        localStorage.setItem('ts_target_bot', b);
-        alert('Bot username updated to @' + b);
-      }
+      if (b) { targetBot = b; localStorage.setItem('ts_target_bot', b); alert('Bot updated to @' + b); }
     }
 
     function toggleCategoryFolder(catId) {
@@ -420,26 +402,21 @@
 
     function redirectToBot(paramStr) {
       const savedBot = localStorage.getItem('ts_target_bot') || targetBot;
-      const botUrl = `https://t.me/${savedBot}?start=${encodeURIComponent(paramStr)}`;
-      window.location.href = botUrl;
+      window.location.href = `https://t.me/${savedBot}?start=${encodeURIComponent(paramStr)}`;
     }
 
     function renderCategories() {
       const container = document.getElementById('categoryContainer');
       const text = i18n[currentLang];
-
       if (categories.length === 0) {
         container.innerHTML = `<p class="text-xs text-slate-500 italic p-3 text-center">No categories registered yet.</p>`;
         return;
       }
-
       container.innerHTML = categories.map(c => {
         const catSpecs = specialists.filter(s => s.catId === c.id);
         const isOpen = !!openCategories[c.id];
-
         return `
           <div class="card-bg rounded-2xl overflow-hidden border-cyan-500/20 transition">
-            <!-- Category Folder Header -->
             <button onclick="toggleCategoryFolder('${c.id}')" class="w-full p-3.5 folder-header flex items-center justify-between text-left hover:bg-slate-800/50 transition">
               <div class="flex items-center gap-3">
                 <i class="fa-solid ${isOpen ? 'fa-folder-open text-amber-400' : 'fa-folder text-cyan-400'} text-lg"></i>
@@ -450,8 +427,6 @@
               </div>
               <i class="fa-solid ${isOpen ? 'fa-chevron-up' : 'fa-chevron-down'} text-xs text-slate-400"></i>
             </button>
-
-            <!-- Specialist List Under Folder -->
             ${isOpen ? `
               <div class="p-3 bg-slate-950/60 space-y-2 border-t border-slate-800">
                 ${catSpecs.length === 0 ? `<p class="text-[11px] text-slate-500 italic p-1">No specialists listed in this category.</p>` : ''}
@@ -475,8 +450,6 @@
 
     function renderAll() {
       const text = i18n[currentLang];
-
-      // Static Translations
       document.getElementById('headerSub').innerText = text.headerSub;
       document.getElementById('langBtnLabel').innerText = text.langBtnLabel;
       document.getElementById('navEmerg').innerText = text.navEmerg;
@@ -497,17 +470,13 @@
       document.getElementById('helpTitle').innerText = text.helpTitle;
       document.getElementById('helpSub').innerText = text.helpSub;
 
-      // Dynamic Counts
       document.getElementById('catCount').innerText = categories.length + ' Categories';
       document.getElementById('storeCount').innerText = storeProducts.length + ' Products';
       document.getElementById('chanCount').innerText = channels.length + ' Channels';
 
-      // Render Categories
       renderCategories();
 
-      // Render Digital Store (ONLY: Product Name, Description, Price)
-      const storeEl = document.getElementById('storeList');
-      storeEl.innerHTML = storeProducts.map(p => `
+      document.getElementById('storeList').innerHTML = storeProducts.map(p => `
         <div class="card-bg p-3.5 rounded-2xl flex items-center justify-between border-purple-500/20">
           <div class="space-y-0.5 pr-2">
             <h4 class="font-bold text-white text-xs">${currentLang === 'EN' ? p.nameEn : p.nameAm}</h4>
@@ -520,9 +489,7 @@
         </div>
       `).join('');
 
-      // Render Channels (ONLY: Channel Name, Description)
-      const chanEl = document.getElementById('channelList');
-      chanEl.innerHTML = channels.map(c => `
+      document.getElementById('channelList').innerHTML = channels.map(c => `
         <div class="card-bg p-3.5 rounded-2xl flex items-center justify-between border-blue-500/20">
           <div class="space-y-0.5 pr-2">
             <div class="flex items-center gap-2">
@@ -539,35 +506,26 @@
       `).join('');
     }
 
-    // Admin Tab Switcher
     function switchAdminTab(tabId) {
       ['tabSpec', 'tabStore', 'tabChan'].forEach(t => document.getElementById(t).classList.add('hidden'));
       document.getElementById(tabId).classList.remove('hidden');
     }
 
     function populateCategoryDropdown() {
-      const select = document.getElementById('specCategory');
-      select.innerHTML = categories.map(c => `<option value="${c.id}">${c.nameEn} (${c.nameAm})</option>`).join('');
+      document.getElementById('specCategory').innerHTML = categories.map(c => `<option value="${c.id}">${c.nameEn} (${c.nameAm})</option>`).join('');
     }
 
-    // Save Specialist Function
     function saveSpecialist() {
       let catId = document.getElementById('specCategory').value;
       const newCatName = document.getElementById('newCategoryName').value.trim();
-
       if (newCatName) {
-        const newCat = {
-          id: 'cat_' + Date.now(),
-          nameEn: newCatName,
-          nameAm: newCatName
-        };
+        const newCat = { id: 'cat_' + Date.now(), nameEn: newCatName, nameAm: newCatName };
         categories.push(newCat);
         catId = newCat.id;
         localStorage.setItem('ts_categories', JSON.stringify(categories));
         document.getElementById('newCategoryName').value = '';
         populateCategoryDropdown();
       }
-
       const s = {
         id: 'sp_' + Date.now(),
         catId: catId,
@@ -576,17 +534,13 @@
         specEn: document.getElementById('specDescEn').value || 'Specialist',
         specAm: document.getElementById('specDescAm').value || 'ስፔሻሊስት'
       };
-
       specialists.push(s);
       localStorage.setItem('ts_specialists', JSON.stringify(specialists));
-      
       ['specNameEn','specNameAm','specDescEn','specDescAm'].forEach(id => document.getElementById(id).value = '');
-      
       renderAll();
       renderAdminLists();
     }
 
-    // Save Digital Product
     function saveDigitalProduct() {
       const p = {
         id: 'pr_' + Date.now(),
@@ -596,17 +550,13 @@
         descEn: document.getElementById('prodDescEn').value || 'Medical product details.',
         descAm: document.getElementById('prodDescAm').value || 'የምርት ዝርዝር መረጃ።'
       };
-
       storeProducts.push(p);
       localStorage.setItem('ts_store', JSON.stringify(storeProducts));
-
       ['prodTitleEn','prodTitleAm','prodPrice','prodDescEn','prodDescAm'].forEach(id => document.getElementById(id).value = '');
-
       renderAll();
       renderAdminLists();
     }
 
-    // Save Channel
     function saveChannel() {
       const c = {
         id: 'ch_' + Date.now(),
@@ -617,12 +567,9 @@
         descEn: document.getElementById('chanDescEn').value || 'Channel description.',
         descAm: document.getElementById('chanDescAm').value || 'የቻናል መግለጫ።'
       };
-
       channels.push(c);
       localStorage.setItem('ts_channels', JSON.stringify(channels));
-
       ['chanNameEn','chanNameAm','chanLink','chanDescEn','chanDescAm'].forEach(id => document.getElementById(id).value = '');
-
       renderAll();
       renderAdminLists();
     }
@@ -654,7 +601,6 @@
     function deleteStore(id) { storeProducts = storeProducts.filter(x => x.id !== id); localStorage.setItem('ts_store', JSON.stringify(storeProducts)); renderAll(); renderAdminLists(); }
     function deleteChan(id) { channels = channels.filter(x => x.id !== id); localStorage.setItem('ts_channels', JSON.stringify(channels)); renderAll(); renderAdminLists(); }
 
-    // Initial Launch
     renderAll();
   </script>
 </body>
