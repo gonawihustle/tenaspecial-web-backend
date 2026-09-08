@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tenaspecial Hub | ጤና ስፔሻል ዲጂታል ማዕከል</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background-color: #080e1e; color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif; scroll-behavior: smooth; }
+    .card-bg { background-color: #0f192e; border: 1px solid #1a2a4a; }
+    .neon-border { border-color: #00d2ff; box-shadow: 0 0 10px rgba(0, 210, 255, 0.2); }
+    .folder-header { background: linear-gradient(135deg, #112240 0%, #0a192f 100%); }
+    .modal { background: rgba(3, 7, 18, 0.88); backdrop-filter: blur(10px); }
+  </style>
+</head>
+<body class="pb-16">
+
+  <!-- Header Navigation -->
+  <header class="sticky top-0 z-40 bg-[#080e1e]/95 backdrop-blur border-b border-[#1a2a4a] px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-400 flex items-center justify-center text-cyan-400 text-xl font-bold">
+        <i class="fa-solid fa-user-doctor"></i>
+      </div>
+      <div>
+        <h1 class="text-base font-bold text-white leading-tight">Tenaspecial Hub</h1>
+        <p class="text-[11px] text-cyan-400 font-medium" id="headerSub">ጤና ስፔሻል ዲጂታል ማዕከል</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button onclick="toggleLang()" class="px-3 py-1 rounded-full bg-cyan-950 border border-cyan-700 text-cyan-300 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95">
+        <i class="fa-solid fa-globe text-cyan-400"></i> <span id="langBtnLabel">አማርኛ</span>
+      </button>
+      <button onclick="openAdminModal()" class="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/50 text-amber-400 text-xs font-medium flex items-center gap-1 transition active:scale-95">
+        <i class="fa-solid fa-shield-halved"></i> <span>Admin</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-2xl mx-auto px-4 pt-4 space-y-6">
+
+    <!-- Quick Dynamic Section Links -->
+    <div class="flex items-center justify-center gap-2 flex-wrap text-xs font-medium pt-1">
+      <a href="#emergency" class="px-3 py-1.5 rounded-xl bg-red-500/20 border border-red-500/40 text-red-300 flex items-center gap-1.5"><i class="fa-solid fa-truck-medical"></i><span id="navEmerg">Emergency</span></a>
+      <a href="#specialists" class="px-3 py-1.5 rounded-xl card-bg border border-cyan-500/30 text-cyan-300 flex items-center gap-1.5"><i class="fa-solid fa-folder-tree"></i><span id="navSpec">Specialties</span></a>
+      <a href="#store" class="px-3 py-1.5 rounded-xl card-bg border border-purple-500/30 text-purple-300 flex items-center gap-1.5"><i class="fa-solid fa-store"></i><span id="navStore">Store</span></a>
+      <a href="#channels" class="px-3 py-1.5 rounded-xl card-bg border border-blue-500/30 text-blue-300 flex items-center gap-1.5"><i class="fa-solid fa-paper-plane"></i><span id="navChan">Channels</span></a>
+      <a href="#about" class="px-3 py-1.5 rounded-xl card-bg text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-circle-info"></i><span id="navAbout">About Us</span></a>
+    </div>
+
+    <!-- Emergency & Homecare Service Card -->
+    <section id="emergency" class="card-bg p-4 rounded-2xl border-2 border-red-500/40 space-y-3">
+      <div class="p-3 rounded-xl bg-red-950/50 border border-red-800/60 flex items-start gap-3">
+        <div class="p-2 rounded-lg bg-red-500/20 text-red-400 text-xl font-bold flex-shrink-0">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div>
+          <h3 class="text-xs font-bold text-red-300 uppercase tracking-wide" id="emergTitle">Emergency Notice</h3>
+          <p class="text-xs text-red-200 mt-1 leading-relaxed font-medium" id="emergText">
+            For emergency medical/surgical services please go to the nearby health institution urgently.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+          <p class="text-[11px] text-slate-400 font-semibold flex items-center gap-1.5">
+            <i class="fa-solid fa-ambulance text-red-400"></i> <span id="ambLabel">Ambulance Services</span>
+          </p>
+          <div class="flex items-center gap-2 pt-1">
+            <a href="tel:+251908343267" class="text-xs font-bold text-red-400 hover:underline">+251908343267</a>
+            <span class="text-slate-600">|</span>
+            <a href="tel:+251967449552" class="text-xs font-bold text-red-400 hover:underline">+251967449552</a>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+          <p class="text-[11px] text-slate-400 font-semibold flex items-center gap-1.5">
+            <i class="fa-solid fa-house-medical text-emerald-400"></i> <span id="homeLabel">Homecare Service</span>
+          </p>
+          <div class="pt-1">
+            <a href="tel:+251967449552" class="text-xs font-bold text-emerald-400 hover:underline">+251967449552</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 1: Specialist Categories (Folder Structure) -->
+    <section id="specialists" class="space-y-3">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <h3 class="font-bold text-white text-base flex items-center gap-2">
+          <i class="fa-solid fa-folder-tree text-cyan-400"></i>
+          <span id="secSpecTitle">Speciality Categories</span>
+        </h3>
+        <span class="text-xs text-cyan-400 font-semibold" id="catCount">0 Categories</span>
+      </div>
+      
+      <p class="text-xs text-slate-400" id="specSubText">Select a speciality category folder below to view available doctors.</p>
+
+      <div id="categoryContainer" class="space-y-3 pt-1"></div>
+    </section>
+
+    <!-- Section 2: Digital Medical Store -->
+    <section id="store" class="space-y-3 pt-2">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <h3 class="font-bold text-white text-base flex items-center gap-2">
+          <i class="fa-solid fa-book-medical text-purple-400"></i>
+          <span id="secStoreTitle">Digital Medical Store</span>
+        </h3>
+        <span class="text-xs text-purple-400 font-semibold" id="storeCount">0 Products</span>
+      </div>
+
+      <div id="storeList" class="space-y-2.5"></div>
+    </section>
+
+    <!-- Section 3: Premium Channels & VIP Groups -->
+    <section id="channels" class="space-y-3 pt-2">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <h3 class="font-bold text-white text-base flex items-center gap-2">
+          <i class="fa-brands fa-telegram text-blue-400"></i>
+          <span id="secChanTitle">Channels & Groups</span>
+        </h3>
+        <span class="text-xs text-blue-400 font-semibold" id="chanCount">0 Channels</span>
+      </div>
+
+      <div id="channelList" class="space-y-2.5"></div>
+    </section>
+
+    <!-- Section 4: About Us -->
+    <section id="about" class="card-bg p-5 rounded-2xl border-cyan-500/30 space-y-3 mt-8">
+      <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
+        <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-base">
+          <i class="fa-solid fa-hospital-user"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-white text-sm" id="aboutTitle">About TenaSpecial Telemedicine</h3>
+          <p class="text-[10px] text-cyan-400 uppercase tracking-wide">Pioneering Digital Medical Ecosystem</p>
+        </div>
+      </div>
+      <p class="text-xs text-slate-300 leading-relaxed" id="aboutBody">
+        TenaSpecial is a comprehensive digital telemedicine platform bridging patients with certified specialized doctors. We enable direct access to medical advice, specialist consultations, homecare medical care, and verified digital health manuals with seamlessly integrated Telegram bot workflows.
+      </p>
+    </section>
+
+    <!-- Section 5: Help & Support (At Bottom) -->
+    <section id="support" class="card-bg p-5 rounded-2xl border-slate-800 text-center space-y-3">
+      <div class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 mx-auto flex items-center justify-center text-lg">
+        <i class="fa-solid fa-headset"></i>
+      </div>
+      <div>
+        <h4 class="text-sm font-bold text-white" id="helpTitle">Help & Support</h4>
+        <p class="text-xs text-slate-400 mt-0.5" id="helpSub">Need assistance or have questions regarding medical bookings?</p>
+      </div>
+      <div class="pt-1 flex items-center justify-center gap-2">
+        <a href="https://t.me/tenaspecial" target="_blank" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-2 transition">
+          <i class="fa-brands fa-telegram text-sm"></i> <span>Contact @tenaspecial</span>
+        </a>
+      </div>
+    </section>
+
+    <p class="text-center text-[11px] text-slate-500 pb-6">© 2026 Tenaspecial Hub | Powered by Superadmin Ecosystem</p>
+  </main>
+
+  <!-- MODAL: Superadmin Login -->
+  <div id="adminLoginModal" class="fixed inset-0 z-50 modal hidden flex items-center justify-center p-4">
+    <div class="card-bg w-full max-w-sm rounded-2xl p-5 border border-amber-500/40 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <h3 class="font-bold text-amber-400 text-sm flex items-center gap-2">
+          <i class="fa-solid fa-user-shield"></i> Superadmin Authentication
+        </h3>
+        <button onclick="closeModal('adminLoginModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Telegram ID (Authorized)</label>
+          <input type="text" id="adminTgId" placeholder="e.g. 6379774725 or 501384766" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Superadmin Password</label>
+          <input type="password" id="adminPass" placeholder="Enter password" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-amber-500">
+        </div>
+        <p id="loginError" class="text-red-400 text-[11px] hidden font-semibold">Access Denied! Invalid Telegram ID or Password.</p>
+      </div>
+
+      <button onclick="verifyAdminLogin()" class="w-full py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs uppercase tracking-wider">
+        Authenticate Access
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: Superadmin Control Panel -->
+  <div id="adminPanelModal" class="fixed inset-0 z-50 modal hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="card-bg w-full max-w-md rounded-2xl p-5 border border-amber-500/40 my-8 space-y-4 max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <div>
+          <h3 class="font-bold text-amber-400 text-sm flex items-center gap-2">
+            <i class="fa-solid fa-sliders"></i> Superadmin Control Panel
+          </h3>
+          <p class="text-[10px] text-slate-400">Manage Specialties, Store & Channels</p>
+        </div>
+        <button onclick="closeModal('adminPanelModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Telegram Bot Handle -->
+      <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5 text-xs">
+        <label class="block text-cyan-400 font-bold">Target Bot Username (Redirection)</label>
+        <div class="flex gap-2">
+          <input type="text" id="adminBotHandle" placeholder="e.g. tenaspecial_bot" class="flex-1 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs">
+          <button onclick="saveBotHandle()" class="px-3 py-1.5 rounded-xl bg-cyan-600 text-white font-bold text-xs">Save Bot</button>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="grid grid-cols-3 gap-1 bg-slate-900 p-1 rounded-xl text-xs font-semibold">
+        <button onclick="switchAdminTab('tabSpec')" id="tabSpecBtn" class="py-1.5 rounded-lg bg-cyan-600 text-white">Specialists</button>
+        <button onclick="switchAdminTab('tabStore')" id="tabStoreBtn" class="py-1.5 rounded-lg text-slate-400">Digital Store</button>
+        <button onclick="switchAdminTab('tabChan')" id="tabChanBtn" class="py-1.5 rounded-lg text-slate-400">Channels</button>
+      </div>
+
+      <!-- TAB 1: Specialists & Categories Management -->
+      <div id="tabSpec" class="space-y-3 text-xs">
+        <h4 class="font-bold text-white border-b border-slate-800 pb-1">Add / Register Specialist</h4>
+        
+        <div>
+          <label class="block text-slate-400 mb-1">Select / Add Category Folder</label>
+          <select id="specCategory" class="w-full p-2 rounded-xl bg-slate-900 border border-slate-800 text-white mb-1.5">
+            <!-- Dynamic categories populated via JS -->
+          </select>
+          <input type="text" id="newCategoryName" placeholder="Or enter new Category Name (if not in list)" class="w-full p-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <input type="text" id="specNameEn" placeholder="Doctor Name (EN)" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-white">
+          <input type="text" id="specNameAm" placeholder="Doctor Name (AM)" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-white">
+        </div>
+        
+        <div class="grid grid-cols-2 gap-2">
+          <input type="text" id="specDescEn" placeholder="Speciality (EN)" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-white">
+          <input type="text" id="specDescAm" placeholder="Speciality (AM)" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-white">
+        </div>
+
+        <button onclick="saveSpecialist()" class="w-full py-2 rounded-xl bg-cyan-600 text-white font-bold">Save Specialist to Category</button>
+        
+        <div id="adminSpecList" class="space-y-1.5 pt-2"></div>
+      </div>
+
+      <!-- TAB 2: Digital Store Management -->
+      <div id="tabStore" class="space-y-3 text-xs hidden">
+        <h4 class="font-bold text-white border-b border-slate-800 pb-1">Add / Edit Digital Product</h4>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="text" id="prodTitleEn" placeholder="Product Name (EN)" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-white">
+          <input type="text" id="prodTitleAm" placeholder="Product Name (AM)" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-white">
+        </div>
+        <input type="text" id="prodPrice" placeholder="Price e.g. 150 ETB" class="w-full p-2 rounded-xl bg-slate-900 border border-slate-800 text-white">
+        <div class="grid grid-cols-2 gap-2">
+          <input type="text" id="prodDescEn" placeholder="Description (EN)" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-white">
+          <input type="text" id="prodDescAm" placeholder="Description (AM)" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-white">
+        </div>
+
+        <button onclick="saveDigitalProduct()" class="w-full py-2 rounded-xl bg-purple-600 text-white font-bold">Save Digital Product</button>
+
+        <div id="adminStoreList" class="space-y-1.5 pt-2"></div>
+      </div>
+
+      <!-- TAB 3: Channels & Groups Management -->
+      <div id="tabChan" class="space-y-3 text-xs hidden">
+        <h4 class="font-bold text-white border-b border-slate-800 pb-1">Add / Edit Channel or Group</h4>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="text" id="chanNameEn" placeholder="Channel Name (EN)" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-white">
+          <input type="text" id="chanNameAm" placeholder="Channel Name (AM)" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-white">
+        </div>
+        
+        <select id="chanType" class="w-full p-2 rounded-xl bg-slate-900 border border-slate-800 text-white">
+          <option value="FREE">FREE CHANNEL / GROUP</option>
+          <option value="PAID">PREMIUM / VIP MEMBERSHIP</option>
+        </select>
+
+        <input type="text" id="chanLink" placeholder="Telegram Link (for FREE channels e.g. https://t.me/...)" class="w-full p-2 rounded-xl bg-slate-900 border border-slate-800 text-white">
+
+        <div class="grid grid-cols-2 gap-2">
+          <input type="text" id="chanDescEn" placeholder="Description (EN)" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-white">
+          <input type="text" id="chanDescAm" placeholder="Description (AM)" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-white">
+        </div>
+
+        <button onclick="saveChannel()" class="w-full py-2 rounded-xl bg-blue-600 text-white font-bold">Save Channel / Group</button>
+
+        <div id="adminChanList" class="space-y-1.5 pt-2"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // State management
+    let currentLang = 'EN';
+    let targetBot = localStorage.getItem('ts_target_bot') || 'tenaspecial_bot';
+    
+    // Allowed Admin IDs
+    const allowedAdminIds = ['6379774725', '501384766'];
+
+    // Categories Data
+    let categories = JSON.parse(localStorage.getItem('ts_categories')) || [
+      { id: 'cat_gen', nameEn: 'General Medicine', nameAm: 'ጠቅላላ ህክምና' },
+      { id: 'cat_ped', nameEn: 'Pediatrics & Child Health', nameAm: 'የህፃናት ህክምና' },
+      { id: 'cat_surg', nameEn: 'General Surgery', nameAm: 'ጠቅላላ ቀዶ ጥገና' }
+    ];
+
+    // Specialists Data
+    let specialists = JSON.parse(localStorage.getItem('ts_specialists')) || [
+      { id: 'sp1', catId: 'cat_gen', nameEn: 'Dr. Selam Hailu', nameAm: 'ዶ/ር ሰላም ሀይሉ', specEn: 'General Practitioner', specAm: 'የጠቅላላ ህክምና ስፔሻሊስት' },
+      { id: 'sp2', catId: 'cat_ped', nameEn: 'Dr. Yonas Tadesse', nameAm: 'ዶ/ር ዮናስ ታደሰ', specEn: 'Pediatric Consultant', specAm: 'የህጻናት ህክምና አማካሪ' }
+    ];
+
+    // Digital Store Products Data
+    let storeProducts = JSON.parse(localStorage.getItem('ts_store')) || [
+      { id: 'pr1', nameEn: 'Emergency First Aid Guide', nameAm: 'የመጀመሪያ እርዳታ መመሪያ', descEn: 'Comprehensive emergency home medical manual.', descAm: 'ለቤት ውስጥ ድንገተኛ ህክምና አጠቃላይ መመሪያ።', price: '150 ETB' }
+    ];
+
+    // Channels Data
+    let channels = JSON.parse(localStorage.getItem('ts_channels')) || [
+      { id: 'ch1', nameEn: 'Tenaspecial Free Health Hub', nameAm: 'ጤና ስፔሻል ነፃ የጤና ማዕከል', descEn: 'Free daily health tips and public updates.', descAm: 'ነፃ የየዕለቱ የጤና መረጃዎች እና ምክሮች።', type: 'FREE', link: 'https://t.me/tenaspecial' },
+      { id: 'ch2', nameEn: 'VIP Doctor Consultation Group', nameAm: 'የቪአይፒ ዶክተር ማህበር', descEn: 'Exclusive membership group for doctor access.', descAm: 'የቪአይፒ የዶክተር ጥያቄና መልስ አባልነት።', type: 'PAID', link: '' }
+    ];
+
+    // Open category tabs tracking
+    let openCategories = {};
+
+    // Language Translation Dictionaries
+    const i18n = {
+      EN: {
+        headerSub: "Tenaspecial Digital Hub",
+        langBtnLabel: "አማርኛ",
+        navEmerg: "Emergency",
+        navSpec: "Specialties",
+        navStore: "Store",
+        navChan: "Channels",
+        navAbout: "About Us",
+        emergTitle: "Emergency Notice",
+        emergText: "For emergency medical/surgical services please go to the nearby health institution urgently.",
+        ambLabel: "If you need an ambulance please call",
+        homeLabel: "Homecare Medical Service",
+        secSpecTitle: "Speciality Categories",
+        specSubText: "Select a category folder below to view available doctors.",
+        secStoreTitle: "Digital Medical Store",
+        secChanTitle: "Channels & Groups",
+        aboutTitle: "About TenaSpecial Telemedicine",
+        aboutBody: "TenaSpecial is a premier telemedicine platform connecting patients directly with certified specialist doctors. We provide specialized virtual consultations, homecare medical services, and medical guides through seamless Telegram bot workflows.",
+        helpTitle: "Help & Support",
+        helpSub: "Need assistance or have questions regarding medical bookings?",
+        continueBot: "Continue in Bot",
+        joinFree: "Join Channel"
+      },
+      AM: {
+        headerSub: "ጤና ስፔሻል ዲጂታል ማዕከል",
+        langBtnLabel: "English",
+        navEmerg: "ድንገተኛ",
+        navSpec: "ስፔሻሊስቶች",
+        navStore: "መደብር",
+        navChan: "ቻናሎች",
+        navAbout: "ስለ እኛ",
+        emergTitle: "የድንገተኛ ህክምና ማሳሰቢያ",
+        emergText: "ለድንገተኛ ህክምና ወይም ቀዶ ጥገና አገልግሎት እባክዎን በአቅራቢያዎ ወደሚገኝ የጤና ተቋም በአስቸኳይ ይሂዱ።",
+        ambLabel: "አምቡላንስ ከፈለጉ እባክዎን ይደውሉ",
+        homeLabel: "የቤት ለቤት ህክምና አገልግሎት",
+        secSpecTitle: "የስፔሻሊስት ዘርፎች",
+        specSubText: "የዶክተሮችን ዝርዝር ለማየት ከታች ያለውን የዘርፍ ፎልደር ይክፈቱ።",
+        secStoreTitle: "ዲጂታል የጤና መደብር",
+        secChanTitle: "ቻናሎች እና ግሩፖች",
+        aboutTitle: "ስለ ጤና ስፔሻል ቴሌሜዲሲን",
+        aboutBody: "ጤና ስፔሻል ታካሚዎችን ከተረጋገጡ የህክምና ስፔሻሊስቶች ጋር የሚያገናኝ የቴሌሜዲሲን መድረክ ነው። የባለሙያ አማካሪ ህክምናን፣ የቤት ለቤት ህክምናን እና ዲጂታል መመሪያዎችን በቴሌግራም ቦት በኩል ያመቻቻል።",
+        helpTitle: "እርዳታ እና ድጋፍ",
+        helpSub: "እርዳታ ወይም ተጨማሪ ጥያቄዎች ካሉዎት ያነጋግሩን።",
+        continueBot: "በቦቱ ይቀጥሉ",
+        joinFree: "ቻናል ይቀላቀሉ"
+      }
+    };
+
+    function toggleLang() {
+      currentLang = currentLang === 'EN' ? 'AM' : 'EN';
+      renderAll();
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    function openAdminModal() { document.getElementById('adminLoginModal').classList.remove('hidden'); }
+
+    // Superadmin Login
+    function verifyAdminLogin() {
+      const tgId = document.getElementById('adminTgId').value.trim();
+      const pass = document.getElementById('adminPass').value.trim();
+
+      if (allowedAdminIds.includes(tgId) && pass === 'tenaspecialadmin') {
+        document.getElementById('loginError').classList.add('hidden');
+        closeModal('adminLoginModal');
+        document.getElementById('adminPanelModal').classList.remove('hidden');
+        document.getElementById('adminBotHandle').value = targetBot;
+        populateCategoryDropdown();
+        renderAdminLists();
+      } else {
+        document.getElementById('loginError').classList.remove('hidden');
+      }
+    }
+
+    function saveBotHandle() {
+      const b = document.getElementById('adminBotHandle').value.trim().replace('@','');
+      if (b) {
+        targetBot = b;
+        localStorage.setItem('ts_target_bot', b);
+        alert('Bot username updated to @' + b);
+      }
+    }
+
+    function toggleCategoryFolder(catId) {
+      openCategories[catId] = !openCategories[catId];
+      renderCategories();
+    }
+
+    function redirectToBot(paramStr) {
+      const savedBot = localStorage.getItem('ts_target_bot') || targetBot;
+      const botUrl = `https://t.me/${savedBot}?start=${encodeURIComponent(paramStr)}`;
+      window.location.href = botUrl;
+    }
+
+    function renderCategories() {
+      const container = document.getElementById('categoryContainer');
+      const text = i18n[currentLang];
+
+      if (categories.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 italic p-3 text-center">No categories registered yet.</p>`;
+        return;
+      }
+
+      container.innerHTML = categories.map(c => {
+        const catSpecs = specialists.filter(s => s.catId === c.id);
+        const isOpen = !!openCategories[c.id];
+
+        return `
+          <div class="card-bg rounded-2xl overflow-hidden border-cyan-500/20 transition">
+            <!-- Category Folder Header -->
+            <button onclick="toggleCategoryFolder('${c.id}')" class="w-full p-3.5 folder-header flex items-center justify-between text-left hover:bg-slate-800/50 transition">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid ${isOpen ? 'fa-folder-open text-amber-400' : 'fa-folder text-cyan-400'} text-lg"></i>
+                <div>
+                  <h4 class="font-bold text-white text-xs">${currentLang === 'EN' ? c.nameEn : c.nameAm}</h4>
+                  <span class="text-[10px] text-slate-400">${catSpecs.length} Specialist(s)</span>
+                </div>
+              </div>
+              <i class="fa-solid ${isOpen ? 'fa-chevron-up' : 'fa-chevron-down'} text-xs text-slate-400"></i>
+            </button>
+
+            <!-- Specialist List Under Folder -->
+            ${isOpen ? `
+              <div class="p-3 bg-slate-950/60 space-y-2 border-t border-slate-800">
+                ${catSpecs.length === 0 ? `<p class="text-[11px] text-slate-500 italic p-1">No specialists listed in this category.</p>` : ''}
+                ${catSpecs.map(s => `
+                  <div class="p-3 rounded-xl card-bg flex items-center justify-between border-slate-800">
+                    <div>
+                      <h5 class="font-bold text-white text-xs">${currentLang === 'EN' ? s.nameEn : s.nameAm}</h5>
+                      <p class="text-[11px] text-cyan-400 font-medium">${currentLang === 'EN' ? s.specEn : s.specAm}</p>
+                    </div>
+                    <button onclick="redirectToBot('spec_${s.id}')" class="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center gap-1.5 transition active:scale-95">
+                      <span>${text.continueBot}</span> <i class="fa-brands fa-telegram"></i>
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAll() {
+      const text = i18n[currentLang];
+
+      // Static Translations
+      document.getElementById('headerSub').innerText = text.headerSub;
+      document.getElementById('langBtnLabel').innerText = text.langBtnLabel;
+      document.getElementById('navEmerg').innerText = text.navEmerg;
+      document.getElementById('navSpec').innerText = text.navSpec;
+      document.getElementById('navStore').innerText = text.navStore;
+      document.getElementById('navChan').innerText = text.navChan;
+      document.getElementById('navAbout').innerText = text.navAbout;
+      document.getElementById('emergTitle').innerText = text.emergTitle;
+      document.getElementById('emergText').innerText = text.emergText;
+      document.getElementById('ambLabel').innerText = text.ambLabel;
+      document.getElementById('homeLabel').innerText = text.homeLabel;
+      document.getElementById('secSpecTitle').innerText = text.secSpecTitle;
+      document.getElementById('specSubText').innerText = text.specSubText;
+      document.getElementById('secStoreTitle').innerText = text.secStoreTitle;
+      document.getElementById('secChanTitle').innerText = text.secChanTitle;
+      document.getElementById('aboutTitle').innerText = text.aboutTitle;
+      document.getElementById('aboutBody').innerText = text.aboutBody;
+      document.getElementById('helpTitle').innerText = text.helpTitle;
+      document.getElementById('helpSub').innerText = text.helpSub;
+
+      // Dynamic Counts
+      document.getElementById('catCount').innerText = categories.length + ' Categories';
+      document.getElementById('storeCount').innerText = storeProducts.length + ' Products';
+      document.getElementById('chanCount').innerText = channels.length + ' Channels';
+
+      // Render Categories
+      renderCategories();
+
+      // Render Digital Store (ONLY: Product Name, Description, Price)
+      const storeEl = document.getElementById('storeList');
+      storeEl.innerHTML = storeProducts.map(p => `
+        <div class="card-bg p-3.5 rounded-2xl flex items-center justify-between border-purple-500/20">
+          <div class="space-y-0.5 pr-2">
+            <h4 class="font-bold text-white text-xs">${currentLang === 'EN' ? p.nameEn : p.nameAm}</h4>
+            <p class="text-[11px] text-slate-400 leading-snug">${currentLang === 'EN' ? p.descEn : p.descAm}</p>
+            <p class="text-xs text-amber-400 font-bold pt-1">${p.price}</p>
+          </div>
+          <button onclick="redirectToBot('store_${p.id}')" class="px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 transition flex-shrink-0 active:scale-95">
+            <span>${text.continueBot}</span> <i class="fa-brands fa-telegram"></i>
+          </button>
+        </div>
+      `).join('');
+
+      // Render Channels (ONLY: Channel Name, Description)
+      const chanEl = document.getElementById('channelList');
+      chanEl.innerHTML = channels.map(c => `
+        <div class="card-bg p-3.5 rounded-2xl flex items-center justify-between border-blue-500/20">
+          <div class="space-y-0.5 pr-2">
+            <div class="flex items-center gap-2">
+              <h4 class="font-bold text-white text-xs">${currentLang === 'EN' ? c.nameEn : c.nameAm}</h4>
+              <span class="text-[9px] px-2 py-0.5 rounded-full font-bold ${c.type === 'FREE' ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}">${c.type}</span>
+            </div>
+            <p class="text-[11px] text-slate-400 leading-snug">${currentLang === 'EN' ? c.descEn : c.descAm}</p>
+          </div>
+          ${c.type === 'FREE' 
+            ? `<a href="${c.link || 'https://t.me/tenaspecial'}" target="_blank" class="px-3 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition flex-shrink-0 active:scale-95">${text.joinFree}</a>`
+            : `<button onclick="redirectToBot('vip_${c.id}')" class="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition flex-shrink-0 active:scale-95"><span>${text.continueBot}</span> <i class="fa-brands fa-telegram"></i></button>`
+          }
+        </div>
+      `).join('');
+    }
+
+    // Admin Tab Switcher
+    function switchAdminTab(tabId) {
+      ['tabSpec', 'tabStore', 'tabChan'].forEach(t => document.getElementById(t).classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
+    }
+
+    function populateCategoryDropdown() {
+      const select = document.getElementById('specCategory');
+      select.innerHTML = categories.map(c => `<option value="${c.id}">${c.nameEn} (${c.nameAm})</option>`).join('');
+    }
+
+    // Save Specialist Function
+    function saveSpecialist() {
+      let catId = document.getElementById('specCategory').value;
+      const newCatName = document.getElementById('newCategoryName').value.trim();
+
+      if (newCatName) {
+        const newCat = {
+          id: 'cat_' + Date.now(),
+          nameEn: newCatName,
+          nameAm: newCatName
+        };
+        categories.push(newCat);
+        catId = newCat.id;
+        localStorage.setItem('ts_categories', JSON.stringify(categories));
+        document.getElementById('newCategoryName').value = '';
+        populateCategoryDropdown();
+      }
+
+      const s = {
+        id: 'sp_' + Date.now(),
+        catId: catId,
+        nameEn: document.getElementById('specNameEn').value || 'Doctor',
+        nameAm: document.getElementById('specNameAm').value || 'ዶክተር',
+        specEn: document.getElementById('specDescEn').value || 'Specialist',
+        specAm: document.getElementById('specDescAm').value || 'ስፔሻሊስት'
+      };
+
+      specialists.push(s);
+      localStorage.setItem('ts_specialists', JSON.stringify(specialists));
+      
+      ['specNameEn','specNameAm','specDescEn','specDescAm'].forEach(id => document.getElementById(id).value = '');
+      
+      renderAll();
+      renderAdminLists();
+    }
+
+    // Save Digital Product
+    function saveDigitalProduct() {
+      const p = {
+        id: 'pr_' + Date.now(),
+        nameEn: document.getElementById('prodTitleEn').value || 'Product Name',
+        nameAm: document.getElementById('prodTitleAm').value || 'የምርት ስም',
+        price: document.getElementById('prodPrice').value || 'Free',
+        descEn: document.getElementById('prodDescEn').value || 'Medical product details.',
+        descAm: document.getElementById('prodDescAm').value || 'የምርት ዝርዝር መረጃ።'
+      };
+
+      storeProducts.push(p);
+      localStorage.setItem('ts_store', JSON.stringify(storeProducts));
+
+      ['prodTitleEn','prodTitleAm','prodPrice','prodDescEn','prodDescAm'].forEach(id => document.getElementById(id).value = '');
+
+      renderAll();
+      renderAdminLists();
+    }
+
+    // Save Channel
+    function saveChannel() {
+      const c = {
+        id: 'ch_' + Date.now(),
+        nameEn: document.getElementById('chanNameEn').value || 'Channel Name',
+        nameAm: document.getElementById('chanNameAm').value || 'የቻናል ስም',
+        type: document.getElementById('chanType').value,
+        link: document.getElementById('chanLink').value,
+        descEn: document.getElementById('chanDescEn').value || 'Channel description.',
+        descAm: document.getElementById('chanDescAm').value || 'የቻናል መግለጫ።'
+      };
+
+      channels.push(c);
+      localStorage.setItem('ts_channels', JSON.stringify(channels));
+
+      ['chanNameEn','chanNameAm','chanLink','chanDescEn','chanDescAm'].forEach(id => document.getElementById(id).value = '');
+
+      renderAll();
+      renderAdminLists();
+    }
+
+    function renderAdminLists() {
+      document.getElementById('adminSpecList').innerHTML = specialists.map(s => `
+        <div class="p-2 rounded-xl bg-slate-900 flex justify-between items-center text-[11px]">
+          <span class="text-white font-bold">${s.nameEn} - ${s.specEn}</span>
+          <button onclick="deleteSpec('${s.id}')" class="text-red-400 font-bold">Remove</button>
+        </div>
+      `).join('');
+
+      document.getElementById('adminStoreList').innerHTML = storeProducts.map(p => `
+        <div class="p-2 rounded-xl bg-slate-900 flex justify-between items-center text-[11px]">
+          <span class="text-white font-bold">${p.nameEn} (${p.price})</span>
+          <button onclick="deleteStore('${p.id}')" class="text-red-400 font-bold">Remove</button>
+        </div>
+      `).join('');
+
+      document.getElementById('adminChanList').innerHTML = channels.map(c => `
+        <div class="p-2 rounded-xl bg-slate-900 flex justify-between items-center text-[11px]">
+          <span class="text-white font-bold">${c.nameEn} [${c.type}]</span>
+          <button onclick="deleteChan('${c.id}')" class="text-red-400 font-bold">Remove</button>
+        </div>
+      `).join('');
+    }
+
+    function deleteSpec(id) { specialists = specialists.filter(x => x.id !== id); localStorage.setItem('ts_specialists', JSON.stringify(specialists)); renderAll(); renderAdminLists(); }
+    function deleteStore(id) { storeProducts = storeProducts.filter(x => x.id !== id); localStorage.setItem('ts_store', JSON.stringify(storeProducts)); renderAll(); renderAdminLists(); }
+    function deleteChan(id) { channels = channels.filter(x => x.id !== id); localStorage.setItem('ts_channels', JSON.stringify(channels)); renderAll(); renderAdminLists(); }
+
+    // Initial Launch
+    renderAll();
+  </script>
+</body>
+</html>
