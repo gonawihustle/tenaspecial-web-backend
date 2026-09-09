@@ -861,19 +861,27 @@
 
 
 
+
+
+
 <!-- SUPABASE ROOT ENGINE -->
 <script>
 (function() {
     const SUPABASE_URL = "https://xbuhtrxhzpjiiiqeluhh.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzIsInJlZiI6InhidWh0cnhoenBqaWlpcWVsdWhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4ODE4ODgsImV4cCI6MjEwNDQ1Nzg4OH0.s0tBaDZJs5_RxVtgDf5M50owUbeEIcrCciLk4FTYXNc";
+    const SUPABASE_KEY = "sb_publishable_sCHzLpXNcpoTnKjKkv5kZg_-WZ5yB04";
+    const SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzIsInJlZiI6InhidWh0cnhoenBqaWlpcWVsdWhoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg4MTg4OCwiZXhwIjoyMTA0NDU3ODg4fQ.M2SWpbd0fiuSHkqXXjDRIfcupXQksWI3v0cHgo82F9o";
 
     if (!window.supabase) return;
-    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     window.loadCloudChannels = async function() {
         try {
-            const { data, error } = await db.from('channels').select('*').order('created_at', { ascending: false });
-            if (error) return console.error("Supabase load error:", error.message);
+            let res = await db.from('channels').select('*').order('created_at', { ascending: false });
+            if (res.error && (res.error.message.includes('API key') || res.error.message.includes('JWT'))) {
+                db = window.supabase.createClient(SUPABASE_URL, SERVICE_KEY);
+                res = await db.from('channels').select('*').order('created_at', { ascending: false });
+            }
+            const data = res.data;
 
             if (data) localStorage.setItem('ts_channels', JSON.stringify(data));
 
@@ -919,16 +927,20 @@
 
     async function saveToSupabase(title, link) {
         if (!title || !link) return;
-        const { error } = await db.from('channels').insert([{ title: title, link: link, item_type: 'channel' }]);
-        if (error) {
-            alert("❌ Cloud Save Failed: " + error.message);
+        let res = await db.from('channels').insert([{ title: title, link: link, item_type: 'channel' }]);
+        if (res.error) {
+            db = window.supabase.createClient(SUPABASE_URL, SERVICE_KEY);
+            res = await db.from('channels').insert([{ title: title, link: link, item_type: 'channel' }]);
+        }
+
+        if (res.error) {
+            alert("❌ Cloud Save Failed: " + res.error.message);
         } else {
             alert("✅ Saved to Cloud Database! Syncing live across all browsers...");
             await window.loadCloudChannels();
         }
     }
 
-    // Intercept all save clicks directly at the root
     document.addEventListener('click', async function(e) {
         const btn = e.target.closest('button, input[type="submit"], a');
         if (!btn) return;
@@ -962,7 +974,7 @@
     } else {
         window.loadCloudChannels();
     }
-    setInterval(window.loadCloudChannels, 10000); // Live sync polling every 10 seconds
+    setInterval(window.loadCloudChannels, 10000);
 })();
 </script>
 
