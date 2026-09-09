@@ -870,14 +870,17 @@
 
 
 
+
+
+
 <!-- SUPABASE CLOUD ENGINE FOR CHANNELS -->
 <script>
 (function() {
     const SUPABASE_URL = "https://xbuhtrxhzpjiiiqeluhh.supabase.co";
-    const SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzIsInJlZiI6InhidWh0cnhoenBqaWlpcWVsdWhoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODg4MTg4OCwiZXhwIjoyMTA0NDU3ODg4fQ.M2SWpbd0fiuSHkqXXjDRIfcupXQksWI3v0cHgo82F9o";
+    const API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhidWh0cnhoenBqaWlpcWVsdWhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4ODE4ODgsImV4cCI6MjEwNDQ1Nzg4OH0.s0tBaDZJs5_RxVtgDf5M50owUbeEIcrCciLk4FTYXNc";
 
     if (!window.supabase) return;
-    const db = window.supabase.createClient(SUPABASE_URL, SERVICE_KEY);
+    const db = window.supabase.createClient(SUPABASE_URL, API_KEY);
 
     window.loadCloudChannels = async function() {
         try {
@@ -1003,7 +1006,6 @@
 
                     let { error } = await db.from('channels').insert([payload]);
 
-                    // Fallback if schema columns are not present
                     if (error && error.message && error.message.includes('column')) {
                         delete payload.is_paid;
                         delete payload.description;
