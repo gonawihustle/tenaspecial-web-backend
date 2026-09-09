@@ -850,6 +850,9 @@
 
 
 
+
+
+
 <!-- SUPABASE CLOUD SYNC -->
 <script>
 (function() {
@@ -864,8 +867,9 @@
             const { data, error } = await db.from('channels').select('*').order('created_at', { ascending: false });
             if (!error && data) {
                 localStorage.setItem('ts_channels', JSON.stringify(data));
-                if (typeof window.loadAllData === 'function') window.loadAllData();
-                else location.reload();
+                if (typeof window.loadAllData === 'function') {
+                    window.loadAllData();
+                }
             }
         } catch (err) {
             console.error("Fetch error:", err);
@@ -873,8 +877,7 @@
     }
 
     document.addEventListener('submit', async function(e) {
-        e.preventDefault(); // Stop page from refreshing before cloud write finishes
-        
+        e.preventDefault();
         const form = e.target;
         const titleInput = form.querySelector('input[placeholder*="Title"], input[placeholder*="Name"], input[name*="title"]');
         const linkInput = form.querySelector('input[placeholder*="http"], input[placeholder*="Link"], input[name*="link"]');
@@ -887,14 +890,13 @@
             if (error) {
                 alert("Cloud save failed: " + error.message);
             } else {
-                alert("Saved to cloud! Syncing across all browsers...");
+                alert("Saved to cloud!");
                 form.reset();
                 await syncFromCloud();
             }
         }
     });
 
-    // Auto-sync from cloud on load
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', syncFromCloud);
     } else {
