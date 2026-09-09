@@ -888,7 +888,10 @@
 
 
 
-<!-- SUPABASE DIRECT ENGINE -->
+
+
+
+<!-- SUPABASE SAFE SCHEMA ENGINE -->
 <script id="tenaspecial-core">
 (function() {
     try { localStorage.clear(); sessionStorage.clear(); } catch(e){}
@@ -900,11 +903,9 @@
     if (!window.supabase) return;
     const db = window.supabase.createClient(SUPABASE_URL, API_KEY);
 
-    // Overwrite Admin Modal with explicitly labeled and ID'd fields
+    // Inject Tabbed UI Modal
     function injectProModalUI() {
-        const modalContainer = document.querySelector('div[class*="fixed"], div[class*="modal"]') || document.body;
         let proForm = document.getElementById('ts-pro-admin-forms');
-        
         if (!proForm) {
             proForm = document.createElement('div');
             proForm.id = 'ts-pro-admin-forms';
@@ -929,7 +930,7 @@
                     </div>
                     <div>
                         <label class="block text-[11px] font-bold text-slate-400 mb-1">Speciality Category</label>
-                        <input id="ts-spec-cat" type="text" placeholder="e.g. Cardiology, Pediatrics, Neurology" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500" />
+                        <input id="ts-spec-cat" type="text" placeholder="e.g. Cardiology, Pediatrics" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500" />
                     </div>
                     <button onclick="window.submitSpecialist()" class="w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs rounded-xl transition-all shadow-lg shadow-cyan-500/20">
                         + Add Specialist
@@ -940,11 +941,11 @@
                 <div id="ts-form-store" class="space-y-3 hidden">
                     <div>
                         <label class="block text-[11px] font-bold text-slate-400 mb-1">Product Name</label>
-                        <input id="ts-prod-name" type="text" placeholder="e.g. Pediatric Care PDF Guide" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500" />
+                        <input id="ts-prod-name" type="text" placeholder="e.g. Pediatric Medical Guide" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500" />
                     </div>
                     <div>
                         <label class="block text-[11px] font-bold text-slate-400 mb-1">Description</label>
-                        <input id="ts-prod-desc" type="text" placeholder="Brief details about the resource" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500" />
+                        <input id="ts-prod-desc" type="text" placeholder="Brief details about the product" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500" />
                     </div>
                     <div>
                         <label class="block text-[11px] font-bold text-slate-400 mb-1">Price (ETB)</label>
@@ -990,17 +991,16 @@
                     </button>
                 </div>
 
-                <!-- RESET ALL DATABASE BUTTON -->
+                <!-- DATABASE CONTROL -->
                 <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center">
-                    <span class="text-[11px] text-slate-400">Database Control</span>
+                    <span class="text-[11px] text-slate-400">Cloud Sync Control</span>
                     <button onclick="window.cloudResetAll()" class="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/40 text-red-400 font-bold text-xs rounded-xl border border-red-500/30">
                         🔥 Clear All Items
                     </button>
                 </div>
             `;
             
-            // Insert at the top of admin area
-            const target = document.querySelector('div:has(> input), div[class*="Superadmin"]') || modalContainer;
+            const target = document.querySelector('div:has(> input), div[class*="Superadmin"]') || document.body;
             target.prepend(proForm);
         }
     }
@@ -1011,16 +1011,14 @@
             const btn = document.getElementById('tab-btn-' + t);
             if (form) form.classList.toggle('hidden', t !== tab);
             if (btn) {
-                if (t === tab) {
-                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-500 text-slate-950";
-                } else {
-                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300";
-                }
+                btn.className = (t === tab)
+                    ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-500 text-slate-950"
+                    : "px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300";
             }
         });
     };
 
-    // Submissions
+    // Form Submissions (Only standard Supabase columns used)
     window.submitSpecialist = async function() {
         const name = document.getElementById('ts-spec-name')?.value.trim();
         const spec = document.getElementById('ts-spec-detail')?.value.trim();
@@ -1030,13 +1028,13 @@
 
         const payload = {
             title: name,
-            description: spec + " [CAT:" + cat + "]",
+            description: `[TYPE:specialist] [CAT:${cat}] ${spec}`,
             link: BOT_URL,
-            type: 'specialist',
             is_paid: false
         };
+
         const { error } = await db.from('channels').insert([payload]);
-        if (error) alert("Error adding specialist: " + error.message);
+        if (error) alert("Save Error: " + error.message);
         else {
             alert("Specialist saved successfully!");
             document.getElementById('ts-spec-name').value = '';
@@ -1050,20 +1048,19 @@
         const desc = document.getElementById('ts-prod-desc')?.value.trim() || 'Digital Medical Product';
         const price = document.getElementById('ts-prod-price')?.value.trim();
 
-        if (!name) return alert("Please enter Digital Product Name!");
+        if (!name) return alert("Please enter Product Name!");
 
         const payload = {
             title: name,
-            description: desc + (price ? " - " + price + " ETB" : ""),
+            description: `[TYPE:product] ${desc}${price ? ' - ' + price + ' ETB' : ''}`,
             link: BOT_URL,
-            type: 'product',
-            is_paid: true,
-            price: parseFloat(price) || 0
+            is_paid: true
         };
+
         const { error } = await db.from('channels').insert([payload]);
-        if (error) alert("Error adding product: " + error.message);
+        if (error) alert("Save Error: " + error.message);
         else {
-            alert("Digital product saved successfully!");
+            alert("Digital Product saved successfully!");
             document.getElementById('ts-prod-name').value = '';
             document.getElementById('ts-prod-price').value = '';
             window.syncProCloud();
@@ -1087,15 +1084,15 @@
 
         const payload = {
             title: name,
-            description: desc,
+            description: `[TYPE:${kind}] ${desc}`,
             link: finalLink,
-            type: kind,
             is_paid: isPremium
         };
+
         const { error } = await db.from('channels').insert([payload]);
-        if (error) alert("Error adding item: " + error.message);
+        if (error) alert("Save Error: " + error.message);
         else {
-            alert((kind === 'group' ? "Group" : "Channel") + " saved successfully!");
+            alert("Saved successfully!");
             document.getElementById('ts-chan-name').value = '';
             document.getElementById('ts-chan-link').value = '';
             window.syncProCloud();
@@ -1103,22 +1100,23 @@
     };
 
     window.cloudDeleteItem = async function(id) {
-        if (!confirm("Delete this item?")) return;
+        if (!confirm("Delete item?")) return;
         const { error } = await db.from('channels').delete().eq('id', id);
-        if (error) alert("Delete failed: " + error.message);
+        if (error) alert("Delete Error: " + error.message);
         else window.syncProCloud();
     };
 
     window.cloudResetAll = async function() {
-        if (!confirm("Reset and purge ALL items across the entire app?")) return;
+        if (!confirm("Reset database completely across all browsers?")) return;
         const { error } = await db.from('channels').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-        if (error) alert("Reset error: " + error.message);
+        if (error) alert("Reset Error: " + error.message);
         else {
-            alert("Database cleared!");
+            alert("Database reset!");
             window.syncProCloud();
         }
     };
 
+    // Rendering Engine
     window.syncProCloud = async function() {
         try {
             await db.from('channels').delete().is('title', null);
@@ -1129,9 +1127,9 @@
 
             const items = (data || []).filter(i => i && i.title && i.title !== 'undefined');
 
-            renderSpecialistsModule(items.filter(i => i.type === 'specialist'));
-            renderStoreModule(items.filter(i => i.type === 'product'));
-            renderChannelsModule(items.filter(i => i.type === 'channel' || i.type === 'group'));
+            renderSpecialistsModule(items.filter(i => (i.description && i.description.includes('[TYPE:specialist]')) || i.type === 'specialist'));
+            renderStoreModule(items.filter(i => (i.description && i.description.includes('[TYPE:product]')) || i.type === 'product'));
+            renderChannelsModule(items.filter(i => (i.description && (i.description.includes('[TYPE:channel]') || i.description.includes('[TYPE:group]'))) || i.type === 'channel' || i.type === 'group' || (!i.description || !i.description.includes('[TYPE:'))));
             renderAdminManageList(items);
 
         } catch (e) {}
@@ -1167,17 +1165,20 @@
                         <span class="w-2 h-2 rounded-full bg-cyan-400"></span> ${catName}
                     </h3>
                     <div class="space-y-2">
-                        ${doctors.map(d => `
-                            <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-                                <div>
-                                    <h4 class="text-white font-bold text-sm">${d.title}</h4>
-                                    <p class="text-xs text-slate-400">${(d.description || '').replace(/\[CAT:.*?\]/, '').trim()}</p>
+                        ${doctors.map(d => {
+                            const cleanDesc = (d.description || '').replace(/\[TYPE:.*?\]/g, '').replace(/\[CAT:.*?\]/g, '').trim();
+                            return `
+                                <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+                                    <div>
+                                        <h4 class="text-white font-bold text-sm">${d.title}</h4>
+                                        <p class="text-xs text-slate-400">${cleanDesc}</p>
+                                    </div>
+                                    <a href="${BOT_URL}" target="_blank" class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-extrabold text-xs rounded-xl no-underline shadow-lg shadow-cyan-500/20">
+                                        Book Now ➔
+                                    </a>
                                 </div>
-                                <a href="${BOT_URL}" target="_blank" class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-extrabold text-xs rounded-xl no-underline shadow-lg shadow-cyan-500/20">
-                                    Book Now ➔
-                                </a>
-                            </div>
-                        `).join('')}
+                            `;
+                        }).join('')}
                     </div>
                 </div>
             `;
@@ -1196,17 +1197,20 @@
             return;
         }
 
-        container.innerHTML = prods.map(p => `
-            <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between my-2">
-                <div>
-                    <h4 class="text-white font-bold text-sm">${p.title}</h4>
-                    <p class="text-xs text-slate-400">${p.description || 'Medical Resource'}</p>
+        container.innerHTML = prods.map(p => {
+            const cleanDesc = (p.description || '').replace(/\[TYPE:.*?\]/g, '').trim();
+            return `
+                <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between my-2">
+                    <div>
+                        <h4 class="text-white font-bold text-sm">${p.title}</h4>
+                        <p class="text-xs text-slate-400">${cleanDesc || 'Medical Resource'}</p>
+                    </div>
+                    <a href="${BOT_URL}" target="_blank" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl no-underline shadow-lg shadow-purple-500/20">
+                        Buy Now ➔
+                    </a>
                 </div>
-                <a href="${BOT_URL}" target="_blank" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl no-underline shadow-lg shadow-purple-500/20">
-                    Buy Now ➔
-                </a>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function renderChannelsModule(chans) {
@@ -1223,6 +1227,7 @@
         container.innerHTML = chans.map(c => {
             const isPremium = c.is_paid === true;
             const linkUrl = isPremium ? BOT_URL : (c.link || BOT_URL);
+            const cleanDesc = (c.description || '').replace(/\[TYPE:.*?\]/g, '').trim();
             const badge = isPremium 
                 ? '<span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30">PREMIUM</span>'
                 : '<span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">FREE</span>';
@@ -1234,7 +1239,7 @@
                             <h4 class="text-white font-bold text-sm">${c.title}</h4>
                             ${badge}
                         </div>
-                        <p class="text-xs text-slate-400">${c.description || (c.type === 'group' ? 'Community Group' : 'Official Channel')}</p>
+                        <p class="text-xs text-slate-400">${cleanDesc || 'Community'}</p>
                     </div>
                     <a href="${linkUrl}" target="_blank" class="px-4 py-2 ${isPremium ? 'bg-amber-500 text-slate-950' : 'bg-cyan-500 text-slate-950'} font-bold text-xs rounded-xl no-underline">
                         Join Now
@@ -1259,17 +1264,20 @@
             return;
         }
 
-        listElem.innerHTML = items.map(i => `
-            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between gap-2">
-                <div class="truncate">
-                    <div class="text-xs font-bold text-white truncate">${i.title} <span class="text-[10px] text-cyan-400">(${i.type})</span></div>
-                    <div class="text-[10px] text-slate-400 truncate">${i.description || ''}</div>
+        listElem.innerHTML = items.map(i => {
+            const cleanDesc = (i.description || '').replace(/\[TYPE:.*?\]/g, '').replace(/\[CAT:.*?\]/g, '').trim();
+            return `
+                <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between gap-2">
+                    <div class="truncate">
+                        <div class="text-xs font-bold text-white truncate">${i.title}</div>
+                        <div class="text-[10px] text-slate-400 truncate">${cleanDesc || 'Item'}</div>
+                    </div>
+                    <button onclick="window.cloudDeleteItem('${i.id}')" class="px-2 py-1 bg-red-500/20 text-red-400 font-bold text-[10px] rounded-lg border border-red-500/30">
+                        Remove
+                    </button>
                 </div>
-                <button onclick="window.cloudDeleteItem('${i.id}')" class="px-2 py-1 bg-red-500/20 text-red-400 font-bold text-[10px] rounded-lg border border-red-500/30">
-                    Remove
-                </button>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function findHeader(text) {
