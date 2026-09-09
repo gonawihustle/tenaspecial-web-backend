@@ -301,9 +301,6 @@
 
     // Global site defaults - Editable here to hardcode items for all devices/browsers
     let categories = JSON.parse(localStorage.getItem('ts_categories')) || [
-      { id: 'cat_gen', nameEn: 'General Medicine', nameAm: 'ጠቅላላ ህክምና' },
-      { id: 'cat_ped', nameEn: 'Pediatrics & Child Health', nameAm: 'የህፃናት ህክምና' },
-      { id: 'cat_surg', nameEn: 'General Surgery', nameAm: 'ጠቅላላ ቀዶ ጥገና' }
     ];
 
     let specialists = JSON.parse(localStorage.getItem('ts_specialists')) || [
@@ -311,15 +308,8 @@
       { id: 'sp2', catId: 'cat_ped', nameEn: 'Dr. Yonas Tadesse', nameAm: 'ዶ/ር ዮናስ ታደሰ', specEn: 'Pediatric Consultant', specAm: 'የህጻናት ህክምና አማካሪ' }
     ];
 
-    let storeProducts = JSON.parse(localStorage.getItem('ts_store')) || [
-      { id: 'pr1', nameEn: 'Emergency First Aid Guide', nameAm: 'የመጀመሪያ እርዳታ መመሪያ', descEn: 'Comprehensive emergency home medical manual.', descAm: 'ለቤት ውስጥ ድንገተኛ ህክምና አጠቃላይ መመሪያ።', price: '150 ETB' }
-    ];
-
-    let channels = JSON.parse(localStorage.getItem('ts_channels')) || [
-      { id: 'ch1', nameEn: 'Tenaspecial Free Health Hub', nameAm: 'ጤና ስፔሻል ነፃ የጤና ማዕከል', descEn: 'Free daily health tips and public updates.', descAm: 'ነፃ የየዕለቱ የጤና መረጃዎች እና ምክሮች።', type: 'FREE', link: 'https://t.me/tenaspecial' },
-      { id: 'ch2', nameEn: 'VIP Doctor Consultation Group', nameAm: 'የቪአይፒ ዶክተር ማህበር', descEn: 'Exclusive membership group for doctor access.', descAm: 'የቪአይፒ የዶክተር ጥያቄና መልስ አባልነት።', type: 'PAID', link: '' }
-    ];
-
+    let storeProducts = JSON.parse(localStorage.getItem('ts_store')) || [];
+    let channels = JSON.parse(localStorage.getItem('ts_channels')) || [];
     let openCategories = {};
 
     const i18n = {
