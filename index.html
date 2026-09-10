@@ -378,6 +378,9 @@
 
 
 
+
+
+
 <script id="tenaspecial-master-engine">
 (function() {
     const SUPA_URL = "https://xbuhtrxhzpjiiiqeluhh.supabase.co/rest/v1/channels";
@@ -391,6 +394,19 @@
         "Prefer": "return=representation"
     };
 
+    // 1. Ensure Admin Panel Drawer/Modal Toggles Work
+    document.addEventListener('click', function(e) {
+        const toggleBtn = e.target.closest('[data-admin-toggle], #admin-toggle, .admin-btn, [href="#admin"]');
+        if (toggleBtn) {
+            e.preventDefault();
+            const panel = document.querySelector('#admin-panel, #admin-modal, .admin-drawer, [data-admin-panel]');
+            if (panel) {
+                panel.classList.toggle('hidden');
+                panel.style.display = panel.style.display === 'none' || !panel.style.display ? 'block' : 'none';
+            }
+        }
+    });
+
     async function pushToCloud(payload) {
         try {
             const res = await fetch(SUPA_URL, { 
@@ -399,7 +415,7 @@
                 body: JSON.stringify(payload) 
             });
             if (res.ok) {
-                alert("☁️ Saved successfully!");
+                alert("☁️ Entry saved successfully!");
                 await syncFromCloud();
                 return true;
             } else {
@@ -412,130 +428,120 @@
         return false;
     }
 
-    // Intercept submit events without breaking Admin UI navigation
-    document.addEventListener('submit', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }, true);
+    // 2. Intercept Form Submissions via Explicit Form Type Matching
+    document.addEventListener('submit', async function(e) {
+        const form = e.target;
+        const inputs = Array.from(form.querySelectorAll('input, select, textarea'));
+        const formText = (form.innerText + ' ' + form.action + ' ' + (form.id||'')).toLowerCase();
 
-    // Click handler for forms
-    document.addEventListener('click', async function(e) {
-        const btn = e.target.closest('button, input[type="submit"]');
-        if (!btn) return;
+        // Check form type based on input placeholders and content
+        const hasDoctor = inputs.some(i => (i.placeholder||'').toLowerCase().includes('doctor') || (i.name||'').toLowerCase().includes('doctor'));
+        const hasProduct = inputs.some(i => (i.placeholder||'').toLowerCase().includes('product') || (i.placeholder||'').toLowerCase().includes('price'));
+        const hasChannel = inputs.some(i => (i.placeholder||'').toLowerCase().includes('channel') || (i.placeholder||'').toLowerCase().includes('telegram'));
 
-        const btnText = (btn.innerText || btn.value || '').toLowerCase().trim();
-        const card = btn.closest('div, section, form');
-        if (!card) return;
-
-        const inputs = Array.from(card.querySelectorAll('input, select, textarea'));
-        const cardText = card.innerText.toLowerCase();
-
-        // 1. SPECIALIST FORM
-        if (btnText.includes('specialist') || cardText.includes('speciality') || cardText.includes('doctor')) {
-            if (btnText.includes('save') || btnText.includes('add')) {
-                e.preventDefault(); e.stopPropagation();
-
-                const nameInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('doctor')) || inputs[0];
-                const specInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('speciality')) || inputs[1];
-                const catInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('category') || i.tagName === 'SELECT') || inputs[2];
-
-                const docName = nameInput ? nameInput.value.trim() : '';
-                const speciality = specInput ? specInput.value.trim() : 'Specialist';
-                const category = catInput ? (catInput.value.trim() || 'General') : 'General';
-
-                if (!docName) return alert("Please enter Doctor Name");
-
-                const payload = {
-                    title: docName,
-                    description: `[TYPE:specialist][CAT:${category}][SPEC:${speciality}]`,
-                    link: BOT_URL,
-                    is_paid: false
-                };
-
-                if (await pushToCloud(payload)) {
-                    inputs.forEach(i => { if (i.tagName !== 'SELECT') i.value = ''; });
-                }
-                return;
-            }
-        }
-
-        // 2. STORE PRODUCT FORM
-        if (btnText.includes('product') || btnText.includes('store') || cardText.includes('digital medical store') || cardText.includes('price')) {
-            if (btnText.includes('add') || btnText.includes('save')) {
-                e.preventDefault(); e.stopPropagation();
-
-                const nameInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('product')) || inputs[0];
-                const descInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('description')) || inputs[1];
-                const priceInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('price')) || inputs[2];
-
-                const prodName = nameInput ? nameInput.value.trim() : '';
-                const desc = descInput ? descInput.value.trim() : '';
-                const price = priceInput ? priceInput.value.trim() : '';
-
-                if (!prodName) return alert("Please enter Product Name");
-
-                const payload = {
-                    title: prodName,
-                    description: `[TYPE:product][PRICE:${price}] ${desc}`.trim(),
-                    link: BOT_URL,
-                    is_paid: true
-                };
-
-                if (await pushToCloud(payload)) {
-                    inputs.forEach(i => { if (i.tagName !== 'SELECT') i.value = ''; });
-                }
-                return;
-            }
-        }
-
-        // 3. CHANNELS & GROUPS FORM
-        if (btnText.includes('channel') || btnText.includes('group') || cardText.includes('channels & groups')) {
-            if (btnText.includes('save') || btnText.includes('add')) {
-                e.preventDefault(); e.stopPropagation();
-
-                const nameInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('name')) || inputs[0];
-                const linkInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('link')) || inputs[1];
-
-                const title = nameInput ? nameInput.value.trim() : '';
-                const link = linkInput ? linkInput.value.trim() : '';
-
-                let isPremium = false;
-                let kind = "Channel";
-
-                inputs.filter(i => i.tagName === 'SELECT').forEach(s => {
-                    const val = s.value.toUpperCase();
-                    if (val.includes('PREMIUM')) isPremium = true;
-                    if (val.includes('GROUP')) kind = "Group";
-                });
-
-                if (!title) return alert("Please enter Channel/Group Name");
-
-                const payload = {
-                    title: title,
-                    description: `[TYPE:channel][KIND:${kind}]`,
-                    link: isPremium ? BOT_URL : (link || BOT_URL),
-                    is_paid: isPremium
-                };
-
-                if (await pushToCloud(payload)) {
-                    inputs.forEach(i => { if (i.tagName !== 'SELECT') i.value = ''; });
-                }
-                return;
-            }
-        }
-
-        // 4. WIPE DATABASE BUTTON
-        if (btnText.includes('clear all') || btnText.includes('wipe')) {
+        if (hasDoctor || formText.includes('specialist') || formText.includes('doctor')) {
             e.preventDefault(); e.stopPropagation();
-            if (confirm("⚠️ Wipe all cloud data?")) {
-                await fetch(SUPA_URL + '?title=neq.null_wipe_all', { method: 'DELETE', headers: HEADERS });
-                alert("☁️ Database cleared.");
-                await syncFromCloud();
-            }
+            const nameInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('doctor')) || inputs[0];
+            const specInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('speciality')) || inputs[1];
+            const catInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('category') || i.tagName === 'SELECT') || inputs[2];
+
+            const docName = nameInput ? nameInput.value.trim() : '';
+            const speciality = specInput ? specInput.value.trim() : 'Specialist';
+            const category = catInput ? (catInput.value.trim() || 'General') : 'General';
+
+            if (!docName) return alert("Please enter Doctor Name");
+
+            const payload = {
+                title: docName,
+                description: `[TYPE:specialist][CAT:${category}][SPEC:${speciality}]`,
+                link: BOT_URL,
+                is_paid: false
+            };
+            if (await pushToCloud(payload)) inputs.forEach(i => { if (i.tagName !== 'SELECT') i.value = ''; });
+            return;
+        }
+
+        if (hasProduct || formText.includes('product') || formText.includes('store')) {
+            e.preventDefault(); e.stopPropagation();
+            const nameInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('product')) || inputs[0];
+            const descInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('description')) || inputs[1];
+            const priceInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('price')) || inputs[2];
+
+            const prodName = nameInput ? nameInput.value.trim() : '';
+            const desc = descInput ? descInput.value.trim() : '';
+            const price = priceInput ? priceInput.value.trim() : '';
+
+            if (!prodName) return alert("Please enter Product Name");
+
+            const payload = {
+                title: prodName,
+                description: `[TYPE:product][PRICE:${price}] ${desc}`.trim(),
+                link: BOT_URL,
+                is_paid: true
+            };
+            if (await pushToCloud(payload)) inputs.forEach(i => { if (i.tagName !== 'SELECT') i.value = ''; });
+            return;
+        }
+
+        if (hasChannel || formText.includes('channel') || formText.includes('group')) {
+            e.preventDefault(); e.stopPropagation();
+            const nameInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('name')) || inputs[0];
+            const linkInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('link')) || inputs[1];
+
+            const title = nameInput ? nameInput.value.trim() : '';
+            const link = linkInput ? linkInput.value.trim() : '';
+
+            let isPremium = false;
+            let kind = "Channel";
+
+            inputs.filter(i => i.tagName === 'SELECT').forEach(s => {
+                const val = s.value.toUpperCase();
+                if (val.includes('PREMIUM')) isPremium = true;
+                if (val.includes('GROUP')) kind = "Group";
+            });
+
+            if (!title) return alert("Please enter Channel/Group Name");
+
+            const payload = {
+                title: title,
+                description: `[TYPE:channel][KIND:${kind}]`,
+                link: isPremium ? BOT_URL : (link || BOT_URL),
+                is_paid: isPremium
+            };
+            if (await pushToCloud(payload)) inputs.forEach(i => { if (i.tagName !== 'SELECT') i.value = ''; });
+            return;
         }
     }, true);
 
-    // Dynamic Multi-Section Renderer
+    // 3. Robust DOM Section Container Finder
+    function getSectionBox(keywords) {
+        const elements = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, div, section'));
+        for (const kw of keywords) {
+            const match = elements.find(el => el.children.length === 0 && el.textContent.toLowerCase().includes(kw.toLowerCase()));
+            if (match) {
+                const parent = match.closest('section, div.bg-gray-900, div.p-6, div.rounded-xl, div.shadow-lg') || match.parentElement;
+                let box = parent.querySelector('.ts-dynamic-box');
+                if (!box) {
+                    box = document.createElement('div');
+                    box.className = 'ts-dynamic-box w-full mt-4 space-y-3';
+                    parent.appendChild(box);
+                }
+                // Hide static placeholder elements
+                Array.from(parent.children).forEach(child => {
+                    if (child !== box && child !== match && !child.contains(match)) {
+                        const txt = child.textContent.toLowerCase();
+                        if (txt.includes('no ') || txt.includes('registered') || txt.includes('join free') || child.querySelector('button')) {
+                            child.style.display = 'none';
+                        }
+                    }
+                });
+                return box;
+            }
+        }
+        return null;
+    }
+
+    // 4. Live Multi-Section Cloud Synchronizer
     window.syncFromCloud = async function() {
         try {
             const res = await fetch(SUPA_URL, { headers: HEADERS });
@@ -552,32 +558,8 @@
         } catch(e) {}
     };
 
-    function findSectionContainer(keyword) {
-        const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, div'));
-        const heading = headings.find(h => h.children.length === 0 && h.textContent.trim().toLowerCase().includes(keyword.toLowerCase()));
-        if (!heading) return null;
-
-        const parent = heading.closest('section, div.bg-gray-900, div.p-6, div.rounded-xl') || heading.parentElement;
-        let box = parent.querySelector('.ts-dynamic-box');
-        if (!box) {
-            box = document.createElement('div');
-            box.className = 'ts-dynamic-box w-full mt-4 space-y-3';
-            parent.appendChild(box);
-        }
-
-        Array.from(parent.children).forEach(child => {
-            if (child !== box && child !== heading && !child.contains(heading)) {
-                if (child.textContent.includes('No ') || child.textContent.includes('registered') || child.querySelector('button') || child.textContent.includes('Join Free')) {
-                    child.style.display = 'none';
-                }
-            }
-        });
-
-        return box;
-    }
-
     function renderSpecialists(items) {
-        const container = findSectionContainer('Speciality Categories');
+        const container = getSectionBox(['Speciality Categories', 'Specialist', 'Doctors']);
         if (!container) return;
 
         if (items.length === 0) {
@@ -625,7 +607,7 @@
     }
 
     function renderProducts(items) {
-        const container = findSectionContainer('Digital Medical Store');
+        const container = getSectionBox(['Digital Medical Store', 'Medical Store', 'Products']);
         if (!container) return;
 
         if (items.length === 0) {
@@ -654,7 +636,7 @@
     }
 
     function renderChannels(items) {
-        const container = findSectionContainer('Channels & Groups');
+        const container = getSectionBox(['Channels & Groups', 'Channels', 'Groups']);
         if (!container) return;
 
         if (items.length === 0) {
