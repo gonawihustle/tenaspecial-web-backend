@@ -375,6 +375,9 @@
 
 
 
+
+
+
 <script id="tenaspecial-master-engine">
 (function() {
     const SUPA_URL = "https://xbuhtrxhzpjiiiqeluhh.supabase.co/rest/v1/channels";
@@ -396,7 +399,7 @@
                 body: JSON.stringify(payload) 
             });
             if (res.ok) {
-                alert("☁️ Saved to Cloud! Syncing across all browsers.");
+                alert("☁️ Saved successfully!");
                 await syncFromCloud();
                 return true;
             } else {
@@ -409,13 +412,13 @@
         return false;
     }
 
-    // Stop form page reloads globally
+    // Intercept submit events without breaking Admin UI navigation
     document.addEventListener('submit', function(e) {
         e.preventDefault();
         e.stopPropagation();
     }, true);
 
-    // Global Click Handler with Explicit Section Isolation
+    // Click handler for forms
     document.addEventListener('click', async function(e) {
         const btn = e.target.closest('button, input[type="submit"]');
         if (!btn) return;
@@ -524,7 +527,7 @@
         // 4. WIPE DATABASE BUTTON
         if (btnText.includes('clear all') || btnText.includes('wipe')) {
             e.preventDefault(); e.stopPropagation();
-            if (confirm("⚠️ Wipe all existing data from cloud?")) {
+            if (confirm("⚠️ Wipe all cloud data?")) {
                 await fetch(SUPA_URL + '?title=neq.null_wipe_all', { method: 'DELETE', headers: HEADERS });
                 alert("☁️ Database cleared.");
                 await syncFromCloud();
@@ -604,7 +607,7 @@
                             <div style="color:#94a3b8; font-size:12px;">${spec}</div>
                         </div>
                     </div>
-                    <a href="${BOT_URL}" target="_blank" style="background:#0284c7; color:#ffffff; padding:6px 16px; border-radius:8px; font-size:12px; font-weight:bold; text-decoration:none;">Book Specialist</a>
+                    <a href="${BOT_URL}" target="_blank" style="background:#0284c7; color:#ffffff; padding:6px 16px; border-radius:8px; font-size:12px; font-weight:bold; text-decoration:none;">Book Now</a>
                 </div>`;
             }).join('');
 
@@ -668,10 +671,6 @@
                 ? `<span style="padding:3px 8px; font-size:10px; font-weight:bold; background:rgba(245,158,11,0.2); color:#fbbf24; border:1px solid rgba(245,158,11,0.3); border-radius:6px;">PREMIUM</span>`
                 : `<span style="padding:3px 8px; font-size:10px; font-weight:bold; background:rgba(8,145,178,0.2); color:#22d3ee; border:1px solid rgba(8,145,178,0.3); border-radius:6px;">FREE</span>`;
 
-            const btn = isPremium
-                ? `<a href="${BOT_URL}" target="_blank" style="display:flex; justify-content:center; align-items:center; width:100%; padding:10px; background:#f59e0b; color:#1e293b; font-size:13px; font-weight:bold; border-radius:8px; text-decoration:none; margin-top:12px;">⭐ Get Premium Access →</a>`
-                : `<a href="${item.link || BOT_URL}" target="_blank" style="display:flex; justify-content:center; align-items:center; width:100%; padding:10px; background:#1e293b; color:#22d3ee; font-size:13px; font-weight:bold; border-radius:8px; text-decoration:none; border:1px solid #334155; margin-top:12px;">Join Free ${kind} →</a>`;
-
             return `
             <div style="padding:16px; margin-bottom:12px; background:#0f172a; border:1px solid #1e293b; border-radius:12px;">
                 <div style="display:flex; align-items:center; gap:8px;">
@@ -679,7 +678,7 @@
                     <span style="color:#ffffff; font-weight:bold; font-size:15px; flex-grow:1;">${item.title}</span>
                     ${badge}
                 </div>
-                ${btn}
+                <a href="${item.link || BOT_URL}" target="_blank" style="display:flex; justify-content:center; align-items:center; width:100%; padding:10px; background:#1e293b; color:#22d3ee; font-size:13px; font-weight:bold; border-radius:8px; text-decoration:none; border:1px solid #334155; margin-top:12px;">Join Now</a>
             </div>`;
         }).join('');
     }
