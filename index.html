@@ -295,558 +295,15 @@
     </div>
   </div>
 
-  <script>
-    let currentLang = 'EN';
-    let targetBot = localStorage.getItem('ts_target_bot') || 'tenaspecial_bot';
-    
-    const allowedAdminIds = ['6379774725', '501384766'];
-
-    // Global site defaults - Editable here to hardcode items for all devices/browsers
-    let categories = JSON.parse(localStorage.getItem('ts_categories')) || [
-    ];
-
-    let specialists = JSON.parse(localStorage.getItem('ts_specialists')) || [
-      { id: 'sp1', catId: 'cat_gen', nameEn: 'Dr. Selam Hailu', nameAm: 'ዶ/ር ሰላም ሀይሉ', specEn: 'General Practitioner', specAm: 'የጠቅላላ ህክምና ስፔሻሊስት' },
-      { id: 'sp2', catId: 'cat_ped', nameEn: 'Dr. Yonas Tadesse', nameAm: 'ዶ/ር ዮናስ ታደሰ', specEn: 'Pediatric Consultant', specAm: 'የህጻናት ህክምና አማካሪ' }
-    ];
-
-    let storeProducts = JSON.parse(localStorage.getItem('ts_store')) || [];
-    let channels = JSON.parse(localStorage.getItem('ts_channels')) || [];
-    let openCategories = {};
-
-    const i18n = {
-      EN: {
-        headerSub: "Tenaspecial Digital Hub",
-        langBtnLabel: "አማርኛ",
-        navEmerg: "Emergency",
-        navSpec: "Specialties",
-        navStore: "Store",
-        navChan: "Channels",
-        navAbout: "About Us",
-        emergTitle: "Emergency Notice",
-        emergText: "For emergency medical/surgical services please go to the nearby health institution urgently.",
-        ambLabel: "If you need an ambulance please call",
-        homeLabel: "Homecare Medical Service",
-        secSpecTitle: "Speciality Categories",
-        specSubText: "Select a category folder below to view available doctors.",
-        secStoreTitle: "Digital Medical Store",
-        secChanTitle: "Channels & Groups",
-        aboutTitle: "About TenaSpecial Telemedicine",
-        aboutBody: "TenaSpecial is a premier telemedicine platform connecting patients directly with certified specialist doctors. We provide specialized virtual consultations, homecare medical services, and medical guides through seamless Telegram bot workflows.",
-        helpTitle: "Help & Support",
-        helpSub: "Need assistance or have questions regarding medical bookings?",
-        continueBot: "Continue in Bot",
-        joinFree: "Join Channel"
-      },
-      AM: {
-        headerSub: "ጤና ስፔሻል ዲጂታል ማዕከል",
-        langBtnLabel: "English",
-        navEmerg: "ድንገተኛ",
-        navSpec: "ስፔሻሊስቶች",
-        navStore: "መደብር",
-        navChan: "ቻናሎች",
-        navAbout: "ስለ እኛ",
-        emergTitle: "የድንገተኛ ህክምና ማሳሰቢያ",
-        emergText: "ለድንገተኛ ህክምና ወይም ቀዶ ጥገና አገልግሎት እባክዎን በአቅራቢያዎ ወደሚገኝ የጤና ተቋም በአስቸኳይ ይሂዱ።",
-        ambLabel: "አምቡላንስ ከፈለጉ እባክዎን ይደውሉ",
-        homeLabel: "የቤት ለቤት ህክምና አገልግሎት",
-        secSpecTitle: "የስፔሻሊስት ዘርፎች",
-        specSubText: "የዶክተሮችን ዝርዝር ለማየት ከታች ያለውን የዘርፍ ፎልደር ይክፈቱ።",
-        secStoreTitle: "ዲጂታል የጤና መደብር",
-        secChanTitle: "ቻናሎች እና ግሩፖች",
-        aboutTitle: "ስለ ጤና ስፔሻል ቴሌሜዲሲን",
-        aboutBody: "ጤና ስፔሻል ታካሚዎችን ከተረጋገጡ የህክምና ስፔሻሊስቶች ጋር የሚያገናኝ የቴሌሜዲሲን መድረክ ነው። የባለሙያ አማካሪ ህክምናን፣ የቤት ለቤት ህክምናን እና ዲጂታል መመሪያዎችን በቴሌግራም ቦት በኩል ያመቻቻል።",
-        helpTitle: "እርዳታ እና ድጋፍ",
-        helpSub: "እርዳታ ወይም ተጨማሪ ጥያቄዎች ካሉዎት ያነጋግሩን።",
-        continueBot: "በቦቱ ይቀጥሉ",
-        joinFree: "ቻናል ይቀላቀሉ"
-      }
-    };
-
-    function toggleLang() { currentLang = currentLang === 'EN' ? 'AM' : 'EN'; renderAll(); }
-    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-    function openAdminModal() { document.getElementById('adminLoginModal').classList.remove('hidden'); }
-
-    function verifyAdminLogin() {
-      const tgId = document.getElementById('adminTgId').value.trim();
-      const pass = document.getElementById('adminPass').value.trim();
-      if (allowedAdminIds.includes(tgId) && pass === 'tenaspecialadmin') {
-        document.getElementById('loginError').classList.add('hidden');
-        closeModal('adminLoginModal');
-        document.getElementById('adminPanelModal').classList.remove('hidden');
-        document.getElementById('adminBotHandle').value = targetBot;
-        populateCategoryDropdown();
-        renderAdminLists();
-      } else {
-        document.getElementById('loginError').classList.remove('hidden');
-      }
-    }
-
-    function saveBotHandle() {
-      const b = document.getElementById('adminBotHandle').value.trim().replace('@','');
-      if (b) { targetBot = b; localStorage.setItem('ts_target_bot', b); alert('Bot updated to @' + b); }
-    }
-
-    function toggleCategoryFolder(catId) {
-      openCategories[catId] = !openCategories[catId];
-      renderCategories();
-    }
-
-    function redirectToBot(paramStr) {
-      const savedBot = localStorage.getItem('ts_target_bot') || targetBot;
-      window.location.href = `https://t.me/${savedBot}?start=${encodeURIComponent(paramStr)}`;
-    }
-
-    function renderCategories() {
-      const container = document.getElementById('categoryContainer');
-      const text = i18n[currentLang];
-      if (categories.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-500 italic p-3 text-center">No categories registered yet.</p>`;
-        return;
-      }
-      container.innerHTML = categories.map(c => {
-        const catSpecs = specialists.filter(s => s.catId === c.id);
-        const isOpen = !!openCategories[c.id];
-        return `
-          <div class="card-bg rounded-2xl overflow-hidden border-cyan-500/20 transition">
-            <button onclick="toggleCategoryFolder('${c.id}')" class="w-full p-3.5 folder-header flex items-center justify-between text-left hover:bg-slate-800/50 transition">
-              <div class="flex items-center gap-3">
-                <i class="fa-solid ${isOpen ? 'fa-folder-open text-amber-400' : 'fa-folder text-cyan-400'} text-lg"></i>
-                <div>
-                  <h4 class="font-bold text-white text-xs">${currentLang === 'EN' ? c.nameEn : c.nameAm}</h4>
-                  <span class="text-[10px] text-slate-400">${catSpecs.length} Specialist(s)</span>
-                </div>
-              </div>
-              <i class="fa-solid ${isOpen ? 'fa-chevron-up' : 'fa-chevron-down'} text-xs text-slate-400"></i>
-            </button>
-            ${isOpen ? `
-              <div class="p-3 bg-slate-950/60 space-y-2 border-t border-slate-800">
-                ${catSpecs.length === 0 ? `<p class="text-[11px] text-slate-500 italic p-1">No specialists listed in this category.</p>` : ''}
-                ${catSpecs.map(s => `
-                  <div class="p-3 rounded-xl card-bg flex items-center justify-between border-slate-800">
-                    <div>
-                      <h5 class="font-bold text-white text-xs">${currentLang === 'EN' ? s.nameEn : s.nameAm}</h5>
-                      <p class="text-[11px] text-cyan-400 font-medium">${currentLang === 'EN' ? s.specEn : s.specAm}</p>
-                    </div>
-                    <button onclick="redirectToBot('spec_${s.id}')" class="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center gap-1.5 transition active:scale-95">
-                      <span>${text.continueBot}</span> <i class="fa-brands fa-telegram"></i>
-                    </button>
-                  </div>
-                `).join('')}
-              </div>
-            ` : ''}
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderAll() {
-      const text = i18n[currentLang];
-      document.getElementById('headerSub').innerText = text.headerSub;
-      document.getElementById('langBtnLabel').innerText = text.langBtnLabel;
-      document.getElementById('navEmerg').innerText = text.navEmerg;
-      document.getElementById('navSpec').innerText = text.navSpec;
-      document.getElementById('navStore').innerText = text.navStore;
-      document.getElementById('navChan').innerText = text.navChan;
-      document.getElementById('navAbout').innerText = text.navAbout;
-      document.getElementById('emergTitle').innerText = text.emergTitle;
-      document.getElementById('emergText').innerText = text.emergText;
-      document.getElementById('ambLabel').innerText = text.ambLabel;
-      document.getElementById('homeLabel').innerText = text.homeLabel;
-      document.getElementById('secSpecTitle').innerText = text.secSpecTitle;
-      document.getElementById('specSubText').innerText = text.specSubText;
-      document.getElementById('secStoreTitle').innerText = text.secStoreTitle;
-      document.getElementById('secChanTitle').innerText = text.secChanTitle;
-      document.getElementById('aboutTitle').innerText = text.aboutTitle;
-      document.getElementById('aboutBody').innerText = text.aboutBody;
-      document.getElementById('helpTitle').innerText = text.helpTitle;
-      document.getElementById('helpSub').innerText = text.helpSub;
-
-      document.getElementById('catCount').innerText = categories.length + ' Categories';
-      document.getElementById('storeCount').innerText = storeProducts.length + ' Products';
-      document.getElementById('chanCount').innerText = channels.length + ' Channels';
-
-      renderCategories();
-
-      document.getElementById('storeList').innerHTML = storeProducts.map(p => `
-        <div class="card-bg p-3.5 rounded-2xl flex items-center justify-between border-purple-500/20">
-          <div class="space-y-0.5 pr-2">
-            <h4 class="font-bold text-white text-xs">${currentLang === 'EN' ? p.nameEn : p.nameAm}</h4>
-            <p class="text-[11px] text-slate-400 leading-snug">${currentLang === 'EN' ? p.descEn : p.descAm}</p>
-            <p class="text-xs text-amber-400 font-bold pt-1">${p.price}</p>
-          </div>
-          <button onclick="redirectToBot('store_${p.id}')" class="px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 transition flex-shrink-0 active:scale-95">
-            <span>${text.continueBot}</span> <i class="fa-brands fa-telegram"></i>
-          </button>
-        </div>
-      `).join('');
-
-      document.getElementById('channelList').innerHTML = channels.map(c => `
-        <div class="card-bg p-3.5 rounded-2xl flex items-center justify-between border-blue-500/20">
-          <div class="space-y-0.5 pr-2">
-            <div class="flex items-center gap-2">
-              <h4 class="font-bold text-white text-xs">${currentLang === 'EN' ? c.nameEn : c.nameAm}</h4>
-              <span class="text-[9px] px-2 py-0.5 rounded-full font-bold ${c.type === 'FREE' ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}">${c.type}</span>
-            </div>
-            <p class="text-[11px] text-slate-400 leading-snug">${currentLang === 'EN' ? c.descEn : c.descAm}</p>
-          </div>
-          ${c.type === 'FREE' 
-            ? `<a href="${c.link || 'https://t.me/tenaspecial'}" target="_blank" class="px-3 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition flex-shrink-0 active:scale-95">${text.joinFree}</a>`
-            : `<button onclick="redirectToBot('vip_${c.id}')" class="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition flex-shrink-0 active:scale-95"><span>${text.continueBot}</span> <i class="fa-brands fa-telegram"></i></button>`
-          }
-        </div>
-      `).join('');
-    }
-
-    function switchAdminTab(tabId) {
-      ['tabSpec', 'tabStore', 'tabChan'].forEach(t => document.getElementById(t).classList.add('hidden'));
-      document.getElementById(tabId).classList.remove('hidden');
-    }
-
-    function populateCategoryDropdown() {
-      document.getElementById('specCategory').innerHTML = categories.map(c => `<option value="${c.id}">${c.nameEn} (${c.nameAm})</option>`).join('');
-    }
-
-    function saveSpecialist() {
-      let catId = document.getElementById('specCategory').value;
-      const newCatName = document.getElementById('newCategoryName').value.trim();
-      if (newCatName) {
-        const newCat = { id: 'cat_' + Date.now(), nameEn: newCatName, nameAm: newCatName };
-        categories.push(newCat);
-        catId = newCat.id;
-        localStorage.setItem('ts_categories', JSON.stringify(categories));
-        document.getElementById('newCategoryName').value = '';
-        populateCategoryDropdown();
-      }
-      const s = {
-        id: 'sp_' + Date.now(),
-        catId: catId,
-        nameEn: document.getElementById('specNameEn').value || 'Doctor',
-        nameAm: document.getElementById('specNameAm').value || 'ዶክተር',
-        specEn: document.getElementById('specDescEn').value || 'Specialist',
-        specAm: document.getElementById('specDescAm').value || 'ስፔሻሊስት'
-      };
-      specialists.push(s);
-      localStorage.setItem('ts_specialists', JSON.stringify(specialists));
-      ['specNameEn','specNameAm','specDescEn','specDescAm'].forEach(id => document.getElementById(id).value = '');
-      renderAll();
-      renderAdminLists();
-    }
-
-    function saveDigitalProduct() {
-      const p = {
-        id: 'pr_' + Date.now(),
-        nameEn: document.getElementById('prodTitleEn').value || 'Product Name',
-        nameAm: document.getElementById('prodTitleAm').value || 'የምርት ስም',
-        price: document.getElementById('prodPrice').value || 'Free',
-        descEn: document.getElementById('prodDescEn').value || 'Medical product details.',
-        descAm: document.getElementById('prodDescAm').value || 'የምርት ዝርዝር መረጃ።'
-      };
-      storeProducts.push(p);
-      localStorage.setItem('ts_store', JSON.stringify(storeProducts));
-      ['prodTitleEn','prodTitleAm','prodPrice','prodDescEn','prodDescAm'].forEach(id => document.getElementById(id).value = '');
-      renderAll();
-      renderAdminLists();
-    }
-
-    function saveChannel() {
-      const c = {
-        id: 'ch_' + Date.now(),
-        nameEn: document.getElementById('chanNameEn').value || 'Channel Name',
-        nameAm: document.getElementById('chanNameAm').value || 'የቻናል ስም',
-        type: document.getElementById('chanType').value,
-        link: document.getElementById('chanLink').value,
-        descEn: document.getElementById('chanDescEn').value || 'Channel description.',
-        descAm: document.getElementById('chanDescAm').value || 'የቻናል መግለጫ።'
-      };
-      channels.push(c);
-      localStorage.setItem('ts_channels', JSON.stringify(channels));
-      ['chanNameEn','chanNameAm','chanLink','chanDescEn','chanDescAm'].forEach(id => document.getElementById(id).value = '');
-      renderAll();
-      renderAdminLists();
-    }
-
-    function renderAdminLists() {
-      document.getElementById('adminSpecList').innerHTML = specialists.map(s => `
-        <div class="p-2 rounded-xl bg-slate-900 flex justify-between items-center text-[11px]">
-          <span class="text-white font-bold">${s.nameEn} - ${s.specEn}</span>
-          <button onclick="deleteSpec('${s.id}')" class="text-red-400 font-bold">Remove</button>
-        </div>
-      `).join('');
-
-      document.getElementById('adminStoreList').innerHTML = storeProducts.map(p => `
-        <div class="p-2 rounded-xl bg-slate-900 flex justify-between items-center text-[11px]">
-          <span class="text-white font-bold">${p.nameEn} (${p.price})</span>
-          <button onclick="deleteStore('${p.id}')" class="text-red-400 font-bold">Remove</button>
-        </div>
-      `).join('');
-
-      document.getElementById('adminChanList').innerHTML = channels.map(c => `
-        <div class="p-2 rounded-xl bg-slate-900 flex justify-between items-center text-[11px]">
-          <span class="text-white font-bold">${c.nameEn} [${c.type}]</span>
-          <button onclick="deleteChan('${c.id}')" class="text-red-400 font-bold">Remove</button>
-        </div>
-      `).join('');
-    }
-
-    function deleteSpec(id) { specialists = specialists.filter(x => x.id !== id); localStorage.setItem('ts_specialists', JSON.stringify(specialists)); renderAll(); renderAdminLists(); }
-    function deleteStore(id) { storeProducts = storeProducts.filter(x => x.id !== id); localStorage.setItem('ts_store', JSON.stringify(storeProducts)); renderAll(); renderAdminLists(); }
-    function deleteChan(id) { channels = channels.filter(x => x.id !== id); localStorage.setItem('ts_channels', JSON.stringify(channels)); renderAll(); renderAdminLists(); }
-
-    renderAll();
-  </script>
+  
 
 
-<script>
-(function() {
-    const SUPABASE_URL = "https://xbuhtrxhzpjiiiqeluhh.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhidWh0cnhoenBqaWlpcWVsdWhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4ODE4ODgsImV4cCI6MjEwNDQ1Nzg4OH0.s0tBaDZJs5_RxVtgDf5M50owUbeEIcrCciLk4FTYXNc";
 
-    if (!window.supabase) return;
-    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    window.supabaseDb = db;
-
-    window.deleteChannel = async function(id) {
-        if (!confirm('Are you sure you want to delete this item?')) return;
-        const { error } = await db.from('channels').delete().eq('id', id);
-        if (error) alert('Error: ' + error.message);
-        else { alert('Item deleted.'); loadAllData(); }
-    };
-
-    window.purgeAllChannels = async function() {
-        if (!confirm('⚠️ Delete ALL saved channels and groups from the database?')) return;
-        const { error } = await db.from('channels').delete().neq('id', 0);
-        if (error) alert('Error purging: ' + error.message);
-        else { alert('Database cleared successfully.'); loadAllData(); }
-    };
-
-    window.editChannel = async function(id) {
-        const { data, error } = await db.from('channels').select('*').eq('id', id).single();
-        if (error || !data) return alert('Item not found.');
-
-        const title = prompt('Edit Title:', data.title);
-        if (title === null) return;
-        const link = prompt('Edit Link:', data.link);
-        if (link === null) return;
-        const type = prompt('Type (channel or group):', data.item_type || 'channel');
-        if (type === null) return;
-
-        const { error: err } = await db.from('channels').update({
-            title: title, link: link, item_type: type.toLowerCase().includes('group') ? 'group' : 'channel'
-        }).eq('id', id);
-
-        if (err) alert('Update error: ' + err.message);
-        else { alert('Updated successfully.'); loadAllData(); }
-    };
-
-    async function loadAllData() {
-        const { data: channels } = await db.from('channels').select('*').order('created_at', { ascending: false });
-
-        let saveBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent && b.textContent.includes('Save Channel'));
-        if (saveBtn) {
-            let adminContainer = document.getElementById('admin-channel-management');
-            if (!adminContainer) {
-                adminContainer = document.createElement('div');
-                adminContainer.id = 'admin-channel-management';
-                adminContainer.className = 'mt-6 p-4 bg-slate-900 border border-slate-700 rounded-2xl text-left shadow-2xl';
-                if (saveBtn.parentElement) saveBtn.parentElement.after(adminContainer);
-            }
-
-            let adminHtml = '<div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-700/80">' +
-                '<div><h3 class="text-white font-bold text-sm">⚙️ Manage Saved Items (Admin Only)</h3>' +
-                '<p class="text-[11px] text-slate-400">Edit or delete items stored in cloud</p></div>' +
-                '<button onclick="window.purgeAllChannels()" class="px-2.5 py-1 bg-red-600/30 text-red-300 border border-red-500/40 rounded-lg text-xs font-bold hover:bg-red-600/50">🔥 Clear All</button>' +
-                '</div>';
-
-            if (!channels || channels.length === 0) {
-                adminHtml += '<div class="text-slate-400 text-xs text-center py-3 border border-dashed border-slate-800 rounded-xl">No saved items in database.</div>';
-            } else {
-                adminHtml += '<div class="space-y-2 max-h-64 overflow-y-auto pr-1">';
-                channels.forEach(c => {
-                    const typeText = (c.item_type || 'channel').toUpperCase();
-                    adminHtml += '<div class="p-2.5 bg-slate-800/90 rounded-xl border border-slate-700 flex items-center justify-between gap-2">' +
-                        '<div class="min-w-0 flex-1"><div class="flex items-center gap-1 mb-0.5">' +
-                        '<span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-700 text-cyan-300 font-bold">' + typeText + '</span></div>' +
-                        '<div class="text-white font-bold text-xs truncate">' + (c.title || 'Untitled') + '</div>' +
-                        '<div class="text-slate-400 text-[10px] truncate">' + (c.link || '') + '</div></div>' +
-                        '<div class="flex items-center gap-1 shrink-0">' +
-                        '<button onclick="window.editChannel(' + c.id + ')" class="px-2 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded text-xs font-bold">Edit</button>' +
-                        '<button onclick="window.deleteChannel(' + c.id + ')" class="px-2 py-1 bg-red-500/20 text-red-400 border border-red-500/30 rounded text-xs font-bold">Delete</button>' +
-                        '</div></div>';
-                });
-                adminHtml += '</div>';
-            }
-            adminContainer.innerHTML = adminHtml;
-        }
-
-        const allHeadings = Array.from(document.querySelectorAll('h1, h2, h3, h4, div'));
-        const storeHeader = allHeadings.find(e => e.textContent && e.textContent.trim().toLowerCase().includes('channels & groups') && e.children.length < 3);
-
-        if (storeHeader && storeHeader.parentElement) {
-            let publicContainer = storeHeader.parentElement.querySelector('#public-store-channel-list');
-            if (!publicContainer) {
-                publicContainer = document.createElement('div');
-                publicContainer.id = 'public-store-channel-list';
-                publicContainer.className = 'space-y-3 my-3';
-                storeHeader.parentElement.appendChild(publicContainer);
-            }
-
-            const staticElements = storeHeader.parentElement.querySelectorAll('div');
-            staticElements.forEach(el => {
-                if (el.id !== 'public-store-channel-list' && !publicContainer.contains(el) && el.textContent.includes('Free channel for medical informations')) {
-                    el.style.display = 'none';
-                }
-            });
-
-            if (!channels || channels.length === 0) {
-                publicContainer.innerHTML = '<div class="p-4 text-slate-400 text-xs text-center border border-dashed border-slate-700 rounded-2xl">No channels added yet.</div>';
-            } else {
-                publicContainer.innerHTML = channels.map(c => {
-                    const itemType = (c.item_type || 'channel').toLowerCase() === 'group' ? 'Group' : 'Channel';
-                    const redirectUrl = c.link.startsWith('http') ? c.link : 'https://' + c.link;
-                    return '<div class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700/60 shadow-lg my-3">' +
-                        '<div class="flex items-center justify-between mb-1">' +
-                        '<div class="flex items-center gap-2"><span class="text-xs px-2 py-0.5 rounded bg-slate-700 text-slate-300 font-semibold">' + itemType + '</span>' +
-                        '<h4 class="text-white font-bold text-sm">' + (c.title || '') + '</h4></div>' +
-                        '<span class="px-2.5 py-0.5 border text-[10px] font-bold rounded-md bg-cyan-500/20 text-cyan-400 border-cyan-500/30">FREE</span></div>' +
-                        '<div class="flex items-center justify-between pt-2 border-t border-slate-700/40 mt-2">' +
-                        '<a href="' + redirectUrl + '" target="_blank" class="text-xs font-medium text-cyan-400 hover:text-cyan-300 no-underline">🔗 Join Free ' + itemType + ' →</a>' +
-                        '</div></div>';
-                }).join('');
-            }
-        }
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadAllData);
-    else loadAllData();
-})();
-</script>
 
 
 <!-- STRICT SEPARATION & CLEAN LAYOUT -->
 
-<script>
-(function() {
-    const SUPABASE_URL = "https://xbuhtrxhzpjiiiqeluhh.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhidWh0cnhoenBqaWlpcWVsdWhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4ODE4ODgsImV4cCI6MjEwNDQ1Nzg4OH0.s0tBaDZJs5_RxVtgDf5M50owUbeEIcrCciLk4FTYXNc";
 
-    if (!window.supabase) return;
-    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    window.supabaseDb = db;
-
-    window.deleteChannel = async function(id) {
-        if (!confirm('Are you sure you want to delete this item?')) return;
-        const { error } = await db.from('channels').delete().eq('id', id);
-        if (error) alert('Error: ' + error.message);
-        else { alert('Item deleted.'); loadAllData(); }
-    };
-
-    window.purgeAllChannels = async function() {
-        if (!confirm('⚠️ Delete ALL saved channels and groups from the database?')) return;
-        const { error } = await db.from('channels').delete().neq('id', 0);
-        if (error) alert('Error purging: ' + error.message);
-        else { alert('Database cleared successfully.'); loadAllData(); }
-    };
-
-    window.editChannel = async function(id) {
-        const { data, error } = await db.from('channels').select('*').eq('id', id).single();
-        if (error || !data) return alert('Item not found.');
-
-        const title = prompt('Edit Title:', data.title);
-        if (title === null) return;
-        const link = prompt('Edit Link:', data.link);
-        if (link === null) return;
-        const type = prompt('Type (channel or group):', data.item_type || 'channel');
-        if (type === null) return;
-
-        const { error: err } = await db.from('channels').update({
-            title: title, link: link, item_type: type.toLowerCase().includes('group') ? 'group' : 'channel'
-        }).eq('id', id);
-
-        if (err) alert('Update error: ' + err.message);
-        else { alert('Updated successfully.'); loadAllData(); }
-    };
-
-    async function loadAllData() {
-        const { data: channels } = await db.from('channels').select('*').order('created_at', { ascending: false });
-
-        let saveBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent && b.textContent.includes('Save Channel'));
-        if (saveBtn) {
-            let adminContainer = document.getElementById('admin-channel-management');
-            if (!adminContainer) {
-                adminContainer = document.createElement('div');
-                adminContainer.id = 'admin-channel-management';
-                adminContainer.className = 'mt-6 p-4 bg-slate-900 border border-slate-700 rounded-2xl text-left shadow-2xl';
-                if (saveBtn.parentElement) saveBtn.parentElement.after(adminContainer);
-            }
-
-            let adminHtml = '<div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-700/80">' +
-                '<div><h3 class="text-white font-bold text-sm">⚙️ Manage Saved Items (Admin Only)</h3>' +
-                '<p class="text-[11px] text-slate-400">Edit or delete items stored in cloud</p></div>' +
-                '<button onclick="window.purgeAllChannels()" class="px-2.5 py-1 bg-red-600/30 text-red-300 border border-red-500/40 rounded-lg text-xs font-bold hover:bg-red-600/50">🔥 Clear All</button>' +
-                '</div>';
-
-            if (!channels || channels.length === 0) {
-                adminHtml += '<div class="text-slate-400 text-xs text-center py-3 border border-dashed border-slate-800 rounded-xl">No saved items in database.</div>';
-            } else {
-                adminHtml += '<div class="space-y-2 max-h-64 overflow-y-auto pr-1">';
-                channels.forEach(c => {
-                    const typeText = (c.item_type || 'channel').toUpperCase();
-                    adminHtml += '<div class="p-2.5 bg-slate-800/90 rounded-xl border border-slate-700 flex items-center justify-between gap-2">' +
-                        '<div class="min-w-0 flex-1"><div class="flex items-center gap-1 mb-0.5">' +
-                        '<span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-700 text-cyan-300 font-bold">' + typeText + '</span></div>' +
-                        '<div class="text-white font-bold text-xs truncate">' + (c.title || 'Untitled') + '</div>' +
-                        '<div class="text-slate-400 text-[10px] truncate">' + (c.link || '') + '</div></div>' +
-                        '<div class="flex items-center gap-1 shrink-0">' +
-                        '<button onclick="window.editChannel(' + c.id + ')" class="px-2 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded text-xs font-bold">Edit</button>' +
-                        '<button onclick="window.deleteChannel(' + c.id + ')" class="px-2 py-1 bg-red-500/20 text-red-400 border border-red-500/30 rounded text-xs font-bold">Delete</button>' +
-                        '</div></div>';
-                });
-                adminHtml += '</div>';
-            }
-            adminContainer.innerHTML = adminHtml;
-        }
-
-        const allHeadings = Array.from(document.querySelectorAll('h1, h2, h3, h4, div'));
-        const storeHeader = allHeadings.find(e => e.textContent && e.textContent.trim().toLowerCase().includes('channels & groups') && e.children.length < 3);
-
-        if (storeHeader && storeHeader.parentElement) {
-            let publicContainer = storeHeader.parentElement.querySelector('#public-store-channel-list');
-            if (!publicContainer) {
-                publicContainer = document.createElement('div');
-                publicContainer.id = 'public-store-channel-list';
-                publicContainer.className = 'space-y-3 my-3';
-                storeHeader.parentElement.appendChild(publicContainer);
-            }
-
-            const staticElements = storeHeader.parentElement.querySelectorAll('div');
-            staticElements.forEach(el => {
-                if (el.id !== 'public-store-channel-list' && !publicContainer.contains(el) && el.textContent.includes('Free channel for medical informations')) {
-                    el.style.display = 'none';
-                }
-            });
-
-            if (!channels || channels.length === 0) {
-                publicContainer.innerHTML = '<div class="p-4 text-slate-400 text-xs text-center border border-dashed border-slate-700 rounded-2xl">No channels added yet.</div>';
-            } else {
-                publicContainer.innerHTML = channels.map(c => {
-                    const itemType = (c.item_type || 'channel').toLowerCase() === 'group' ? 'Group' : 'Channel';
-                    const redirectUrl = c.link.startsWith('http') ? c.link : 'https://' + c.link;
-                    return '<div class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700/60 shadow-lg my-3">' +
-                        '<div class="flex items-center justify-between mb-1">' +
-                        '<div class="flex items-center gap-2"><span class="text-xs px-2 py-0.5 rounded bg-slate-700 text-slate-300 font-semibold">' + itemType + '</span>' +
-                        '<h4 class="text-white font-bold text-sm">' + (c.title || '') + '</h4></div>' +
-                        '<span class="px-2.5 py-0.5 border text-[10px] font-bold rounded-md bg-cyan-500/20 text-cyan-400 border-cyan-500/30">FREE</span></div>' +
-                        '<div class="flex items-center justify-between pt-2 border-t border-slate-700/40 mt-2">' +
-                        '<a href="' + redirectUrl + '" target="_blank" class="text-xs font-medium text-cyan-400 hover:text-cyan-300 no-underline">🔗 Join Free ' + itemType + ' →</a>' +
-                        '</div></div>';
-                }).join('');
-            }
-        }
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadAllData);
-    else loadAllData();
-})();
-</script>
 
 
 
@@ -915,7 +372,10 @@
 
 
 <!-- TENASPECIAL CONCRETE CLOUD ENGINE -->
-<script id="tenaspecial-core">
+
+
+
+<script id="tenaspecial-master-engine">
 (function() {
     const SUPA_URL = "https://xbuhtrxhzpjiiiqeluhh.supabase.co/rest/v1/channels";
     const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhidWh0cnhoenBqaWlpcWVsdWhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4ODE4ODgsImV4cCI6MjEwNDQ1Nzg4OH0.s0tBaDZJs5_RxVtgDf5M50owUbeEIcrCciLk4FTYXNc";
@@ -930,256 +390,297 @@
 
     async function pushToCloud(payload) {
         try {
-            const res = await fetch(SUPA_URL, { method: "POST", headers: HEADERS, body: JSON.stringify(payload) });
+            const res = await fetch(SUPA_URL, { 
+                method: "POST", 
+                headers: HEADERS, 
+                body: JSON.stringify(payload) 
+            });
             if (res.ok) {
-                alert("☁️ SAVED TO CLOUD SUCCESSFULLY!");
-                syncFromCloud(); 
+                alert("☁️ Saved to Cloud! Syncing across all browsers.");
+                await syncFromCloud();
                 return true;
             } else {
-                const errText = await res.text();
-                alert("❌ CLOUD REJECTED IT: " + errText); 
+                const err = await res.text();
+                alert("❌ Cloud Error: " + err);
             }
-        } catch(e) { alert("❌ NETWORK ERROR"); }
+        } catch(e) {
+            alert("❌ Connection Error.");
+        }
         return false;
     }
 
-    // KILL DEFAULT FORM SUBMISSIONS
-    window.addEventListener('submit', (e) => { e.preventDefault(); e.stopPropagation(); }, true);
+    // Stop form page reloads globally
+    document.addEventListener('submit', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }, true);
 
-    // EXACT BUTTON MATCHING (No Guesswork)
-    window.addEventListener('click', async (e) => {
-        const btn = e.target.closest('button, input[type="submit"], input[type="button"]');
+    // Global Click Handler with Explicit Section Isolation
+    document.addEventListener('click', async function(e) {
+        const btn = e.target.closest('button, input[type="submit"]');
         if (!btn) return;
-        
+
         const btnText = (btn.innerText || btn.value || '').toLowerCase().trim();
-        const container = btn.closest('form, div.p-4, div.card, div.flex-col, div.bg-gray-800, section, div');
-        if (!container) return;
+        const card = btn.closest('div, section, form');
+        if (!card) return;
 
-        const inputs = Array.from(container.querySelectorAll('input, select, textarea'));
+        const inputs = Array.from(card.querySelectorAll('input, select, textarea'));
+        const cardText = card.innerText.toLowerCase();
 
-        // 1. IS IT A SPECIALIST?
-        if (btnText === 'save specialist to category' || btnText.includes('save specialist')) {
-            e.preventDefault(); e.stopPropagation();
-            
-            const docName = inputs.find(i => (i.placeholder||'').toLowerCase().includes('doctor'))?.value;
-            const spec = inputs.find(i => (i.placeholder||'').toLowerCase().includes('speciality'))?.value || 'Specialist';
-            const customCat = inputs.find(i => (i.placeholder||'').toLowerCase().includes('category'))?.value;
-            const catDropdown = inputs.find(i => i.tagName === 'SELECT' && Array.from(i.options).some(o => o.text.includes('Select')));
-            const finalCat = customCat || (catDropdown ? catDropdown.value : '') || 'General';
-            
-            if (!docName) return alert("Missing Doctor Name");
-            
-            if (await pushToCloud({ title: docName, description: `[TYPE:specialist][CAT:${finalCat}][SPEC:${spec}]`, link: BOT_URL, is_paid: false })) {
-                inputs.forEach(i => { if (i.tagName !== 'SELECT') i.value = ''; });
+        // 1. SPECIALIST FORM
+        if (btnText.includes('specialist') || cardText.includes('speciality') || cardText.includes('doctor')) {
+            if (btnText.includes('save') || btnText.includes('add')) {
+                e.preventDefault(); e.stopPropagation();
+
+                const nameInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('doctor')) || inputs[0];
+                const specInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('speciality')) || inputs[1];
+                const catInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('category') || i.tagName === 'SELECT') || inputs[2];
+
+                const docName = nameInput ? nameInput.value.trim() : '';
+                const speciality = specInput ? specInput.value.trim() : 'Specialist';
+                const category = catInput ? (catInput.value.trim() || 'General') : 'General';
+
+                if (!docName) return alert("Please enter Doctor Name");
+
+                const payload = {
+                    title: docName,
+                    description: `[TYPE:specialist][CAT:${category}][SPEC:${speciality}]`,
+                    link: BOT_URL,
+                    is_paid: false
+                };
+
+                if (await pushToCloud(payload)) {
+                    inputs.forEach(i => { if (i.tagName !== 'SELECT') i.value = ''; });
+                }
+                return;
             }
         }
-        
-        // 2. IS IT A PRODUCT?
-        else if (btnText === 'add product to store' || btnText.includes('add product')) {
-            e.preventDefault(); e.stopPropagation();
-            
-            const name = inputs.find(i => (i.placeholder||'').toLowerCase().includes('product'))?.value;
-            const desc = inputs.find(i => (i.placeholder||'').toLowerCase().includes('description'))?.value || '';
-            const price = inputs.find(i => (i.placeholder||'').toLowerCase().includes('price'))?.value || '';
-            
-            if (!name) return alert("Missing Product Name");
-            
-            if (await pushToCloud({ title: name, description: `[TYPE:product][PRICE:${price}] ${desc}`, link: BOT_URL, is_paid: true })) {
-                inputs.forEach(i => { if (i.tagName !== 'SELECT') i.value = ''; });
+
+        // 2. STORE PRODUCT FORM
+        if (btnText.includes('product') || btnText.includes('store') || cardText.includes('digital medical store') || cardText.includes('price')) {
+            if (btnText.includes('add') || btnText.includes('save')) {
+                e.preventDefault(); e.stopPropagation();
+
+                const nameInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('product')) || inputs[0];
+                const descInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('description')) || inputs[1];
+                const priceInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('price')) || inputs[2];
+
+                const prodName = nameInput ? nameInput.value.trim() : '';
+                const desc = descInput ? descInput.value.trim() : '';
+                const price = priceInput ? priceInput.value.trim() : '';
+
+                if (!prodName) return alert("Please enter Product Name");
+
+                const payload = {
+                    title: prodName,
+                    description: `[TYPE:product][PRICE:${price}] ${desc}`.trim(),
+                    link: BOT_URL,
+                    is_paid: true
+                };
+
+                if (await pushToCloud(payload)) {
+                    inputs.forEach(i => { if (i.tagName !== 'SELECT') i.value = ''; });
+                }
+                return;
             }
         }
-        
-        // 3. IS IT A CHANNEL/GROUP?
-        else if (btnText === 'save channel / group' || btnText.includes('save channel')) {
-            e.preventDefault(); e.stopPropagation();
-            
-            const name = inputs.find(i => (i.placeholder||'').toLowerCase().includes('name'))?.value;
-            const link = inputs.find(i => (i.placeholder||'').toLowerCase().includes('link'))?.value || '';
-            
-            let isPremium = false;
-            let kind = "Channel";
-            inputs.filter(i => i.tagName === 'SELECT').forEach(s => {
-                const val = s.value.toUpperCase();
-                if (val.includes('PREMIUM')) isPremium = true;
-                if (val.includes('GROUP')) kind = "Group";
-            });
-            
-            if (!name) return alert("Missing Name");
-            
-            if (await pushToCloud({ title: name, description: `[TYPE:channel][KIND:${kind}]`, link: isPremium ? BOT_URL : link, is_paid: isPremium })) {
-                inputs.forEach(i => { if (i.tagName !== 'SELECT') i.value = ''; });
+
+        // 3. CHANNELS & GROUPS FORM
+        if (btnText.includes('channel') || btnText.includes('group') || cardText.includes('channels & groups')) {
+            if (btnText.includes('save') || btnText.includes('add')) {
+                e.preventDefault(); e.stopPropagation();
+
+                const nameInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('name')) || inputs[0];
+                const linkInput = inputs.find(i => (i.placeholder||'').toLowerCase().includes('link')) || inputs[1];
+
+                const title = nameInput ? nameInput.value.trim() : '';
+                const link = linkInput ? linkInput.value.trim() : '';
+
+                let isPremium = false;
+                let kind = "Channel";
+
+                inputs.filter(i => i.tagName === 'SELECT').forEach(s => {
+                    const val = s.value.toUpperCase();
+                    if (val.includes('PREMIUM')) isPremium = true;
+                    if (val.includes('GROUP')) kind = "Group";
+                });
+
+                if (!title) return alert("Please enter Channel/Group Name");
+
+                const payload = {
+                    title: title,
+                    description: `[TYPE:channel][KIND:${kind}]`,
+                    link: isPremium ? BOT_URL : (link || BOT_URL),
+                    is_paid: isPremium
+                };
+
+                if (await pushToCloud(payload)) {
+                    inputs.forEach(i => { if (i.tagName !== 'SELECT') i.value = ''; });
+                }
+                return;
             }
         }
-        
-        // CLEAR DB
-        else if (btnText.includes('clear all')) {
+
+        // 4. WIPE DATABASE BUTTON
+        if (btnText.includes('clear all') || btnText.includes('wipe')) {
             e.preventDefault(); e.stopPropagation();
-            if(confirm("DANGER: Wipe entire cloud?")) {
-                await fetch(SUPA_URL + '?title=not.is.null', { method: 'DELETE', headers: HEADERS });
-                alert("☁️ Cloud wiped."); 
-                syncFromCloud();
+            if (confirm("⚠️ Wipe all existing data from cloud?")) {
+                await fetch(SUPA_URL + '?title=neq.null_wipe_all', { method: 'DELETE', headers: HEADERS });
+                alert("☁️ Database cleared.");
+                await syncFromCloud();
             }
         }
     }, true);
 
-    // ==========================================
-    // RENDERING ENGINE
-    // ==========================================
+    // Dynamic Multi-Section Renderer
     window.syncFromCloud = async function() {
         try {
             const res = await fetch(SUPA_URL, { headers: HEADERS });
             if (!res.ok) return;
             const data = await res.json();
-            
+
             const specs = data.filter(d => (d.description || '').includes('[TYPE:specialist]'));
             const prods = data.filter(d => (d.description || '').includes('[TYPE:product]'));
             const chans = data.filter(d => (d.description || '').includes('[TYPE:channel]'));
 
-            updateSpecialistsUI(specs);
-            updateProductsUI(prods);
-            updateChannelsUI(chans);
+            renderSpecialists(specs);
+            renderProducts(prods);
+            renderChannels(chans);
         } catch(e) {}
     };
 
-    function getContainer(headerText, countLabel) {
-        const headers = Array.from(document.querySelectorAll('h2, h3, h4, div'));
-        const header = headers.find(el => el.children.length === 0 && el.textContent.trim().toLowerCase() === headerText.toLowerCase());
-        if (!header) return null;
+    function findSectionContainer(keyword) {
+        const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, div'));
+        const heading = headings.find(h => h.children.length === 0 && h.textContent.trim().toLowerCase().includes(keyword.toLowerCase()));
+        if (!heading) return null;
 
-        const parentRow = header.closest('div.flex') || header.parentElement;
-        
-        // Update local count tags
-        if (parentRow) {
-            const counter = Array.from(parentRow.querySelectorAll('span, div')).find(el => el.textContent.includes(countLabel) || el.textContent.includes('Products') || el.textContent.includes('Categories') || el.textContent.includes('Channels'));
-            if (counter) counter.style.display = 'none'; // Hide the local counter to avoid confusion
+        const parent = heading.closest('section, div.bg-gray-900, div.p-6, div.rounded-xl') || heading.parentElement;
+        let box = parent.querySelector('.ts-dynamic-box');
+        if (!box) {
+            box = document.createElement('div');
+            box.className = 'ts-dynamic-box w-full mt-4 space-y-3';
+            parent.appendChild(box);
         }
 
-        let container = document.getElementById('ts-cloud-box-' + countLabel);
-        
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'ts-cloud-box-' + countLabel;
-            container.style.width = '100%';
-            container.style.marginTop = '16px';
-            if (parentRow && parentRow.nextSibling) {
-                parentRow.parentElement.insertBefore(container, parentRow.nextSibling);
-            } else if (parentRow) {
-                parentRow.parentElement.appendChild(container);
-            }
-        }
-        
-        // Hide ALL local placeholders
-        if (parentRow && parentRow.parentElement) {
-            Array.from(parentRow.parentElement.children).forEach(child => {
-                if (child !== parentRow && child !== container && child.tagName === 'DIV' && (child.textContent.includes('No ') || child.querySelector('button') || child.textContent.includes('Join Free'))) {
-                    if(!child.id.includes('ts-cloud-box')) child.style.display = 'none';
+        Array.from(parent.children).forEach(child => {
+            if (child !== box && child !== heading && !child.contains(heading)) {
+                if (child.textContent.includes('No ') || child.textContent.includes('registered') || child.querySelector('button') || child.textContent.includes('Join Free')) {
+                    child.style.display = 'none';
                 }
-            });
-        }
-        return container;
+            }
+        });
+
+        return box;
     }
 
-    function updateSpecialistsUI(items) {
-        const container = getContainer('Speciality Categories', 'Categories');
+    function renderSpecialists(items) {
+        const container = findSectionContainer('Speciality Categories');
         if (!container) return;
-        if (items.length === 0) return container.innerHTML = `<div style="padding:16px; background:#0f172a; border:1px dashed #1e293b; border-radius:12px; color:#64748b; font-size:12px; text-align:center;">No categories added yet.</div>`;
 
-        const grouped = {};
+        if (items.length === 0) {
+            container.innerHTML = `<div style="padding:16px; background:#0f172a; border:1px dashed #334155; border-radius:12px; color:#64748b; font-size:13px; text-align:center;">No doctor categories registered yet.</div>`;
+            return;
+        }
+
+        const groups = {};
         items.forEach(item => {
-            let cat = "General";
             const catMatch = (item.description || '').match(/\[CAT:(.*?)\]/);
-            if (catMatch && catMatch[1]) cat = catMatch[1].trim();
-            if (!grouped[cat]) grouped[cat] = [];
-            grouped[cat].push(item);
+            const cat = catMatch ? catMatch[1].trim() : 'General';
+            if (!groups[cat]) groups[cat] = [];
+            groups[cat].push(item);
         });
 
         let html = '';
-        for (const [catName, doctors] of Object.entries(grouped)) {
-            let docsHtml = doctors.map(doc => {
-                let spec = "Specialist";
+        for (const [catName, docs] of Object.entries(groups)) {
+            const docsList = docs.map(doc => {
                 const specMatch = (doc.description || '').match(/\[SPEC:(.*?)\]/);
-                if (specMatch && specMatch[1]) spec = specMatch[1].trim();
+                const spec = specMatch ? specMatch[1].trim() : 'Specialist';
                 return `
                 <div style="display:flex; justify-content:space-between; align-items:center; padding: 12px 0; border-bottom: 1px solid #1e293b;">
                     <div style="display:flex; align-items:center; gap:12px;">
-                        <div style="font-size:20px;">👨‍⚕️</div>
+                        <div style="font-size:22px;">👨‍⚕️</div>
                         <div>
-                            <div style="color:white; font-size:14px; font-weight:600;">${doc.title}</div>
+                            <div style="color:#ffffff; font-size:14px; font-weight:600;">${doc.title}</div>
                             <div style="color:#94a3b8; font-size:12px;">${spec}</div>
                         </div>
                     </div>
-                    <a href="${BOT_URL}" target="_blank" style="background:#0284c7; color:white; padding:6px 16px; border-radius:8px; font-size:12px; font-weight:bold; text-decoration:none;">Book</a>
+                    <a href="${BOT_URL}" target="_blank" style="background:#0284c7; color:#ffffff; padding:6px 16px; border-radius:8px; font-size:12px; font-weight:bold; text-decoration:none;">Book Specialist</a>
                 </div>`;
             }).join('');
-            
+
             html += `
-            <details style="background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; margin-bottom: 12px; overflow:hidden;">
-                <summary style="padding: 16px; cursor: pointer; font-weight: bold; color: white; display:flex; align-items:center; gap:12px; outline:none;">
-                    <span style="font-size:18px;">📁</span> <span style="flex-grow:1;">${catName}</span>
-                    <span style="background: #1e293b; color:#cbd5e1; padding: 2px 8px; border-radius: 12px; font-size: 11px;">${doctors.length} Doctors</span>
+            <details style="background:#0f172a; border:1px solid #1e293b; border-radius:12px; margin-bottom:12px; overflow:hidden;" open>
+                <summary style="padding:16px; cursor:pointer; font-weight:bold; color:#ffffff; display:flex; align-items:center; gap:12px; outline:none; background:#1e293b;">
+                    <span style="font-size:18px;">📂</span>
+                    <span style="flex-grow:1; font-size:15px;">${catName}</span>
+                    <span style="background:#0284c7; color:#ffffff; padding:2px 10px; border-radius:12px; font-size:11px;">${docs.length} Doctors</span>
                 </summary>
-                <div style="padding: 0 16px 8px 16px; background: #0b1120;">${docsHtml}</div>
+                <div style="padding: 0 16px 8px 16px; background:#0b1120;">${docsList}</div>
             </details>`;
         }
         container.innerHTML = html;
     }
 
-    function updateProductsUI(items) {
-        const container = getContainer('Digital Medical Store', 'Products');
+    function renderProducts(items) {
+        const container = findSectionContainer('Digital Medical Store');
         if (!container) return;
-        if (items.length === 0) return container.innerHTML = `<div style="padding:16px; background:#0f172a; border:1px dashed #1e293b; border-radius:12px; color:#64748b; font-size:12px; text-align:center;">No products added yet.</div>`;
+
+        if (items.length === 0) {
+            container.innerHTML = `<div style="padding:16px; background:#0f172a; border:1px dashed #334155; border-radius:12px; color:#64748b; font-size:13px; text-align:center;">No store products added yet.</div>`;
+            return;
+        }
 
         container.innerHTML = items.map(item => {
-            let price = "";
             const priceMatch = (item.description || '').match(/\[PRICE:(.*?)\]/);
-            if (priceMatch && priceMatch[1]) price = priceMatch[1].trim();
+            const price = priceMatch ? priceMatch[1].trim() : '';
             const desc = (item.description || '').replace(/\[.*?\]/g, '').trim();
 
             return `
-            <div style="display:flex; justify-content:space-between; align-items:center; padding: 16px; background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; margin-bottom: 12px;">
-                <div style="display:flex; gap:12px; align-items:center;">
-                    <div style="width: 48px; height: 48px; background: rgba(147,51,234,0.15); border: 1px solid rgba(147,51,234,0.3); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px;">🛒</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:#0f172a; border:1px solid #1e293b; border-radius:12px; margin-bottom:12px;">
+                <div style="display:flex; gap:14px; align-items:center;">
+                    <div style="width:48px; height:48px; background:rgba(147,51,234,0.15); border:1px solid rgba(147,51,234,0.3); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px;">🛒</div>
                     <div>
-                        <div style="color:white; font-size:15px; font-weight:bold;">${item.title}</div>
+                        <div style="color:#ffffff; font-size:15px; font-weight:bold;">${item.title}</div>
                         ${desc ? `<div style="color:#94a3b8; font-size:12px; margin-top:2px;">${desc}</div>` : ''}
-                        ${price ? `<div style="color:#10b981; font-weight:bold; font-size:13px; margin-top:4px;">${price}</div>` : ''}
+                        ${price ? `<div style="color:#10b981; font-weight:bold; font-size:13px; margin-top:4px;">${price} ETB</div>` : ''}
                     </div>
                 </div>
-                <a href="${BOT_URL}" target="_blank" style="background:#9333ea; color:white; padding:10px 16px; border-radius:8px; font-weight:bold; font-size:13px; text-decoration:none;">Buy Now</a>
+                <a href="${BOT_URL}" target="_blank" style="background:#9333ea; color:#ffffff; padding:10px 18px; border-radius:8px; font-weight:bold; font-size:13px; text-decoration:none;">Buy Now</a>
             </div>`;
         }).join('');
     }
 
-    function updateChannelsUI(items) {
-        const container = getContainer('Channels & Groups', 'Channels');
+    function renderChannels(items) {
+        const container = findSectionContainer('Channels & Groups');
         if (!container) return;
-        if (items.length === 0) return container.innerHTML = `<div style="padding:16px; background:#0f172a; border:1px dashed #1e293b; border-radius:12px; color:#64748b; font-size:12px; text-align:center;">No channels added yet.</div>`;
+
+        if (items.length === 0) {
+            container.innerHTML = `<div style="padding:16px; background:#0f172a; border:1px dashed #334155; border-radius:12px; color:#64748b; font-size:13px; text-align:center;">No channels added yet.</div>`;
+            return;
+        }
 
         container.innerHTML = items.map(item => {
             const isPremium = item.is_paid === true;
             let kind = "Channel";
             if ((item.description || '').includes('[KIND:Group]')) kind = "Group";
-            
+
             const badge = isPremium 
-                ? `<span style="padding: 2px 6px; font-size: 10px; font-weight: bold; background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); border-radius: 4px;">PREMIUM</span>`
-                : `<span style="padding: 2px 6px; font-size: 10px; font-weight: bold; background: rgba(8,145,178,0.2); color: #22d3ee; border: 1px solid rgba(8,145,178,0.3); border-radius: 4px;">FREE</span>`;
+                ? `<span style="padding:3px 8px; font-size:10px; font-weight:bold; background:rgba(245,158,11,0.2); color:#fbbf24; border:1px solid rgba(245,158,11,0.3); border-radius:6px;">PREMIUM</span>`
+                : `<span style="padding:3px 8px; font-size:10px; font-weight:bold; background:rgba(8,145,178,0.2); color:#22d3ee; border:1px solid rgba(8,145,178,0.3); border-radius:6px;">FREE</span>`;
 
             const btn = isPremium
-                ? `<a href="${BOT_URL}" target="_blank" style="display: flex; justify-content: center; align-items: center; width: 100%; padding: 10px; background: #f59e0b; color: #1e293b; font-size: 13px; font-weight: bold; border-radius: 8px; text-decoration: none; margin-top: 12px;">⭐ Get Premium Access →</a>`
-                : `<a href="${item.link || BOT_URL}" target="_blank" style="display: flex; justify-content: center; align-items: center; width: 100%; padding: 10px; background: #1e293b; color: #22d3ee; font-size: 13px; font-weight: bold; border-radius: 8px; text-decoration: none; border: 1px solid #334155; margin-top: 12px; gap: 6px;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                    Join Free ${kind} →
-                   </a>`;
+                ? `<a href="${BOT_URL}" target="_blank" style="display:flex; justify-content:center; align-items:center; width:100%; padding:10px; background:#f59e0b; color:#1e293b; font-size:13px; font-weight:bold; border-radius:8px; text-decoration:none; margin-top:12px;">⭐ Get Premium Access →</a>`
+                : `<a href="${item.link || BOT_URL}" target="_blank" style="display:flex; justify-content:center; align-items:center; width:100%; padding:10px; background:#1e293b; color:#22d3ee; font-size:13px; font-weight:bold; border-radius:8px; text-decoration:none; border:1px solid #334155; margin-top:12px;">Join Free ${kind} →</a>`;
 
             return `
-                <div style="padding: 16px; margin-bottom: 12px; background: #0f172a; border: 1px solid #1e293b; border-radius: 12px;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="background: #334155; color: #cbd5e1; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">${kind}</span>
-                        <span style="color: white; font-weight: bold; font-size: 15px; flex-grow: 1;">${item.title}</span>
-                        ${badge}
-                    </div>
-                    ${btn}
-                </div>`;
+            <div style="padding:16px; margin-bottom:12px; background:#0f172a; border:1px solid #1e293b; border-radius:12px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="background:#334155; color:#cbd5e1; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; text-transform:uppercase;">${kind}</span>
+                    <span style="color:#ffffff; font-weight:bold; font-size:15px; flex-grow:1;">${item.title}</span>
+                    ${badge}
+                </div>
+                ${btn}
+            </div>`;
         }).join('');
     }
 
